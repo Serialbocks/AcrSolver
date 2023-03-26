@@ -22,6 +22,20 @@ namespace AcrSolver
             uxStatus.AppendText(text + "\r\n");
         }
 
+        private string FormatList(List<int> list)
+        {
+            string result = "";
+            foreach(var number in list)
+            {
+                result += number + ", ";
+            }
+            if(result.Length > 1)
+            {
+                result = result.Substring(0, result.Length - 2);
+            }
+            return result;
+        }
+
         private void uxCapture_Click(object sender, EventArgs e)
         {
             var screenshot = Screenshot.PrintWindow();
@@ -36,6 +50,13 @@ namespace AcrSolver
             // Find the button!
             var buttonSeat = GameStateDetector.FindButton(screenshot);
             WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
+
+            // Find the active player
+            var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
+            WriteStatusLine(String.Format("Active player: {0}", activePlayer));
+
+            var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
+            WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
         }
     }
 }

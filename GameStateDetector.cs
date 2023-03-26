@@ -10,7 +10,87 @@ namespace AcrSolver
 {
     public static class GameStateDetector
     {
-        public static List<OpenCvSharp.Point> RunTemplateMatch(string reference, string template)
+        public static int FindButton(Bitmap screenshot)
+        {
+            var matches = RunTemplateMatch("test.jpg", "button.jpg");
+            if (matches.Count == 0)
+            {
+                return -1;
+            }
+
+            return PlayerFromPoint(screenshot, matches[0]);
+        }
+
+        public static int FindActivePlayer(Bitmap screenshot)
+        {
+            var matches = RunTemplateMatch("test.jpg", "player-active.jpg");
+            if (matches.Count == 0)
+            {
+                return -1;
+            }
+
+            return PlayerFromPoint(screenshot, matches[0]);
+        }
+
+        public static List<int> OpponentsWithCards(Bitmap screenshot)
+        {
+            var result = new List<int>();
+            var matches = RunTemplateMatch("test.jpg", "player-with-cards.jpg");
+
+            foreach(var match in matches)
+            {
+                var player = PlayerFromPoint(screenshot, match);
+                if(player >= 0)
+                {
+                    result.Add(player);
+                }
+            }
+
+            result.Sort();
+            return result
+                .GroupBy(x => x)
+                .Select(x => x.First())
+                .ToList();
+        }
+
+        private static int PlayerFromPoint(Bitmap screenshot, OpenCvSharp.Point point)
+        {
+            var third = screenshot.Width / 3;
+            if (point.Y > screenshot.Height / 2)
+            {
+                // Seat 1, 2, or 6
+                if (point.X < third)
+                {
+                    return 2;
+                }
+                else if (point.X > (2 * third))
+                {
+                    return 6;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            else
+            {
+                // seat 3, 4, or 5
+                if (point.X < third)
+                {
+                    return 3;
+                }
+                else if (point.X > (2 * third))
+                {
+                    return 5;
+                }
+                else
+                {
+                    return 4;
+                }
+            }
+        }
+
+        private static List<OpenCvSharp.Point> RunTemplateMatch(string reference, string template)
         {
             var matches = new List<OpenCvSharp.Point>();
             using (Mat refMat = new Mat(reference))
@@ -21,12 +101,13 @@ namespace AcrSolver
                 Mat gref = refMat.CvtColor(ColorConversionCodes.BGR2GRAY);
                 Mat gtpl = tplMat.CvtColor(ColorConversionCodes.BGR2GRAY);
 
+                double threshold = 0.9;
                 Cv2.MatchTemplate(gref, gtpl, res, TemplateMatchModes.CCoeffNormed);
-                Cv2.Threshold(res, res, 0.8, 1.0, ThresholdTypes.Tozero);
+                Cv2.Threshold(res, res, threshold, 1.0, ThresholdTypes.Tozero);
 
                 while (true)
                 {
-                    double minval, maxval, threshold = 0.8;
+                    double minval, maxval;
                     OpenCvSharp.Point minloc, maxloc;
                     Cv2.MinMaxLoc(res, out minval, out maxval, out minloc, out maxloc);
 
@@ -52,49 +133,6 @@ namespace AcrSolver
             }
         }
 
-        public static int FindButton(Bitmap screenshot)
-        {
-            var matches = RunTemplateMatch("test.jpg", "button.jpg");
-
-            if (matches.Count == 0)
-            {
-                return -1;
-            }
-
-            var match = matches[0];
-            var third = screenshot.Width / 3;
-            if (match.Y > screenshot.Height / 2)
-            {
-                // Seat 1, 2, or 6
-                if (match.X < third)
-                {
-                    return 2;
-                }
-                else if (match.X > (2 * third))
-                {
-                    return 6;
-                }
-                else
-                {
-                    return 1;
-                }
-            }
-            else
-            {
-                // seat 3, 4, or 5
-                if (match.X < third)
-                {
-                    return 3;
-                }
-                else if (match.X > (2 * third))
-                {
-                    return 5;
-                }
-                else
-                {
-                    return 4;
-                }
-            }
-        }
+       
     }
 }

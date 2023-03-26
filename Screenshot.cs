@@ -46,17 +46,7 @@ namespace AcrSolver
                 return null;
             }
 
-            IntPtr? tablehandle = null;
-            foreach(var windowHandle in EnumerateProcessWindowHandles(process.Id))
-            {
-                string windowTitle = GetWindowTitle(windowHandle);
-                if(windowTitle.ToUpper().Contains("NO LIMIT"))
-                {
-                    tablehandle = windowHandle;
-                }
-            }
-            
-            return tablehandle;
+            return process.MainWindowHandle;
         }
 
         private static Process GetAcrProcess()
