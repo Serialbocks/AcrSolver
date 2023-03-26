@@ -50,9 +50,12 @@ namespace AcrSolver
             this.uxStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.uxStatus.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.uxStatus.Location = new System.Drawing.Point(12, 12);
             this.uxStatus.Multiline = true;
             this.uxStatus.Name = "uxStatus";
+            this.uxStatus.ReadOnly = true;
+            this.uxStatus.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.uxStatus.Size = new System.Drawing.Size(434, 182);
             this.uxStatus.TabIndex = 1;
             // 

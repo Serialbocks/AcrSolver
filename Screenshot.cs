@@ -14,38 +14,7 @@ namespace AcrSolver
     {
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-        [DllImport("user32.dll")]
-        public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, int nFlags);
-        const int SRCCOPY = 0xcc0020;
-
-        [DllImportAttribute("gdi32.dll")]
-        private static extern int BitBlt(
-          IntPtr hdcDest,     // handle to destination DC (device context)
-          int nXDest,         // x-coord of destination upper-left corner
-          int nYDest,         // y-coord of destination upper-left corner
-          int nWidth,         // width of destination rectangle
-          int nHeight,        // height of destination rectangle
-          IntPtr hdcSrc,      // handle to source DC
-          int nXSrc,          // x-coordinate of source upper-left corner
-          int nYSrc,          // y-coordinate of source upper-left corner
-          Int32 dwRop         // raster operation code
-          );
-        [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleDC", SetLastError = true)]
-        static extern IntPtr CreateCompatibleDC([In] IntPtr hdc);
-        [DllImport("user32.dll")]
-        static extern IntPtr GetWindowDC(IntPtr hWnd);
-        [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleBitmap")]
-        static extern IntPtr CreateCompatibleBitmap([In] IntPtr hdc, int nWidth, int nHeight);
-        [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
-        public static extern IntPtr SelectObject([In] IntPtr hdc, [In] IntPtr hgdiobj);
-        [DllImport("gdi32.dll", EntryPoint = "DeleteDC")]
-        public static extern bool DeleteDC([In] IntPtr hdc);
-        [DllImport("user32.dll")]
-        static extern bool ReleaseDC(IntPtr hWnd, IntPtr hDC);
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool DeleteObject([In] IntPtr hObject);
-
 
         public static Bitmap PrintWindow()
         {
@@ -55,7 +24,7 @@ namespace AcrSolver
                 return null;
             }
             var handle = (IntPtr)tableHandleNullable;
-            var windowRect = new RECT();
+            RECT windowRect;
 
             GetWindowRect(handle, out windowRect);
             int width = windowRect.Width;
@@ -67,55 +36,6 @@ namespace AcrSolver
                 graphics.CopyFromScreen(windowRect.left, windowRect.top, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
             }
             return bmp;
-
-            //// get te hDC of the target window
-            //IntPtr hdcSrc = GetWindowDC(handle);
-            //
-            //// create a device context we can copy to
-            //IntPtr hdcDest = CreateCompatibleDC(hdcSrc);
-            //
-            //// create a bitmap we can copy it to,
-            //IntPtr hBitmap = CreateCompatibleBitmap(hdcSrc, width, height);
-            //// select the bitmap object
-            //IntPtr hOld = SelectObject(hdcDest, hBitmap);
-            //
-            //// bitblt over
-            //BitBlt(hdcDest, 0, 0, width, height, hdcSrc, 0, 0,
-            //    (int)(CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt));
-            //// restore selection
-            //SelectObject(hdcDest, hOld);
-            //// clean up
-            //DeleteDC(hdcDest);
-            //ReleaseDC(handle, hdcSrc);
-            //
-            //Image img = Image.FromHbitmap(hBitmap);
-            //// free up the Bitmap object
-            //DeleteObject(hBitmap);
-            //
-            //return img;
-
-            //RECT rc;
-            //GetWindowRect(tableHandle, out rc);
-            //
-            //WINDOWINFO info = new WINDOWINFO();
-            //info.cbSize = (uint)Marshal.SizeOf(info);
-            //GetWindowInfo(tableHandle, ref info);
-            //
-            //var destHandle = CreateCompatibleDC(tableHandle);
-            //
-            //BitBlt(destHandle, 0, 0, rc.Width, rc.Height, tableHandle, 0, 0,
-            //    (int)(CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt));
-            //
-            //Bitmap bmp = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb);
-            //Graphics gfxBmp = Graphics.FromImage(bmp);
-            //IntPtr hdcBitmap = gfxBmp.GetHdc();
-            //
-            //PrintWindow(destHandle, hdcBitmap, 0);
-            //
-            //gfxBmp.ReleaseHdc(hdcBitmap);
-            //gfxBmp.Dispose();
-            //
-            //return bmp;
         }
 
         private static IntPtr? GetTableHandle()
@@ -209,9 +129,7 @@ namespace AcrSolver
 
         }
 
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+
     }
 
     [StructLayout(LayoutKind.Sequential)]
