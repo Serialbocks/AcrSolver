@@ -63,39 +63,6 @@ namespace AcrSolver
             }
             return acrProcess;
         }
-        private static string GetWindowTitle(IntPtr windowHandle)
-        {
-            uint SMTO_ABORTIFHUNG = 0x0002;
-            uint WM_GETTEXT = 0xD;
-            int MAX_STRING_SIZE = 32768;
-            IntPtr result;
-            string title = string.Empty;
-            IntPtr memoryHandle = Marshal.AllocCoTaskMem(MAX_STRING_SIZE);
-            Marshal.Copy(title.ToCharArray(), 0, memoryHandle, title.Length);
-            SendMessageTimeout(windowHandle, WM_GETTEXT, (IntPtr)MAX_STRING_SIZE, memoryHandle, SMTO_ABORTIFHUNG, (uint)1000, out result);
-            title = Marshal.PtrToStringAuto(memoryHandle);
-            Marshal.FreeCoTaskMem(memoryHandle);
-            return title;
-        }
-
-        delegate bool EnumThreadDelegate(IntPtr hWnd, IntPtr lParam);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);
-        [DllImport("user32.dll")]
-        static extern bool EnumThreadWindows(int dwThreadId, EnumThreadDelegate lpfn,
-            IntPtr lParam);
-
-        private static IEnumerable<IntPtr> EnumerateProcessWindowHandles(int processId)
-        {
-            var handles = new List<IntPtr>();
-
-            foreach (ProcessThread thread in Process.GetProcessById(processId).Threads)
-                EnumThreadWindows(thread.Id,
-                    (hWnd, lParam) => { handles.Add(hWnd); return true; }, IntPtr.Zero);
-
-            return handles;
-        }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct WINDOWINFO

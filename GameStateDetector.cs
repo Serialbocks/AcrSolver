@@ -12,7 +12,7 @@ namespace AcrSolver
     {
         public static int FindButton(Bitmap screenshot)
         {
-            var matches = RunTemplateMatch("test.jpg", "button.jpg");
+            var matches = RunTemplateMatch(screenshot, "button.jpg");
             if (matches.Count == 0)
             {
                 return -1;
@@ -23,7 +23,7 @@ namespace AcrSolver
 
         public static int FindActivePlayer(Bitmap screenshot)
         {
-            var matches = RunTemplateMatch("test.jpg", "player-active.jpg");
+            var matches = RunTemplateMatch(screenshot, "player-active.jpg");
             if (matches.Count == 0)
             {
                 return -1;
@@ -35,7 +35,7 @@ namespace AcrSolver
         public static List<int> OpponentsWithCards(Bitmap screenshot)
         {
             var result = new List<int>();
-            var matches = RunTemplateMatch("test.jpg", "player-with-cards.jpg");
+            var matches = RunTemplateMatch(screenshot, "player-with-cards.jpg");
 
             foreach(var match in matches)
             {
@@ -89,11 +89,16 @@ namespace AcrSolver
                 }
             }
         }
+        private static byte[] ImageToByte(Image img)
+        {
+            ImageConverter converter = new ImageConverter();
+            return (byte[])converter.ConvertTo(img, typeof(byte[]));
+        }
 
-        private static List<OpenCvSharp.Point> RunTemplateMatch(string reference, string template)
+        private static List<OpenCvSharp.Point> RunTemplateMatch(Bitmap reference, string template)
         {
             var matches = new List<OpenCvSharp.Point>();
-            using (Mat refMat = new Mat(reference))
+            using (Mat refMat = Mat.FromImageData(ImageToByte(reference)))
             using (Mat tplMat = new Mat(template))
             using (Mat res = new Mat(refMat.Rows - tplMat.Rows + 1, refMat.Cols - tplMat.Cols + 1, MatType.CV_32FC1))
             {
