@@ -43,6 +43,7 @@ namespace AcrSolver
             this.uxCapture.TabIndex = 0;
             this.uxCapture.Text = "Capture";
             this.uxCapture.UseVisualStyleBackColor = true;
+            this.uxCapture.Click += new System.EventHandler(this.uxCapture_Click);
             // 
             // uxStatus
             // 

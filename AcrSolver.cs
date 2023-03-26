@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,5 +18,13 @@ namespace AcrSolver
             InitializeComponent();
         }
 
+        private void uxCapture_Click(object sender, EventArgs e)
+        {
+            var screenshot = Screenshot.PrintWindow();
+            if(screenshot != null)
+            {
+                screenshot.Save("test.jpg", ImageFormat.Jpeg);
+            }
+        }
     }
 }
