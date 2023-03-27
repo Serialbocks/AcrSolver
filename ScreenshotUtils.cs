@@ -10,13 +10,24 @@ using System.Threading.Tasks;
 
 namespace AcrSolver
 {
-    public static class Screenshot
+    public class Screenshot
+    {
+        public Bitmap Bitmap { get; set; }
+        public byte[] Bytes { get; set; }
+
+        public Screenshot(Bitmap bitmap)
+        {
+            Bitmap = bitmap;
+            Bytes = ScreenshotUtils.ImageToByte(bitmap);
+        }
+    }
+    public static class ScreenshotUtils
     {
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         [return: MarshalAs(UnmanagedType.Bool)]
 
-        public static Bitmap PrintWindow()
+        public static Screenshot PrintWindow()
         {
             var tableHandleNullable = GetTableHandle();
             if(tableHandleNullable == null)
@@ -35,7 +46,13 @@ namespace AcrSolver
             {
                 graphics.CopyFromScreen(windowRect.left, windowRect.top, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
             }
-            return bmp;
+            return new Screenshot(bmp);
+        }
+
+        public static byte[] ImageToByte(Image img)
+        {
+            ImageConverter converter = new ImageConverter();
+            return (byte[])converter.ConvertTo(img, typeof(byte[]));
         }
 
         private static IntPtr? GetTableHandle()

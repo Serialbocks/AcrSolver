@@ -38,26 +38,31 @@ namespace AcrSolver
 
         private void uxCapture_Click(object sender, EventArgs e)
         {
-            var screenshot = Screenshot.PrintWindow();
+            var screenshot = ScreenshotUtils.PrintWindow();
             if(screenshot == null)
             {
                 WriteStatusLine("Could not find game window");
                 return;
             }
 
-            screenshot.Save("test.jpg", ImageFormat.Jpeg);
+            screenshot.Bitmap.Save("test.jpg", ImageFormat.Jpeg);
 
             var buttonSeat = GameStateDetector.FindButton(screenshot);
             WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
-
+            
             var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
             WriteStatusLine(String.Format("Active player: {0}", activePlayer));
-
+            
             var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
             WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
-
+            
             var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
             WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
+        }
+
+        private void uxClear_Click(object sender, EventArgs e)
+        {
+            uxStatus.Text = String.Empty;
         }
     }
 }

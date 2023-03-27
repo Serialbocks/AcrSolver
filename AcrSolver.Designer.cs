@@ -31,6 +31,7 @@ namespace AcrSolver
         {
             this.uxCapture = new System.Windows.Forms.Button();
             this.uxStatus = new System.Windows.Forms.TextBox();
+            this.uxClear = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // uxCapture
@@ -59,11 +60,22 @@ namespace AcrSolver
             this.uxStatus.Size = new System.Drawing.Size(434, 182);
             this.uxStatus.TabIndex = 1;
             // 
+            // uxClear
+            // 
+            this.uxClear.Location = new System.Drawing.Point(274, 207);
+            this.uxClear.Name = "uxClear";
+            this.uxClear.Size = new System.Drawing.Size(75, 23);
+            this.uxClear.TabIndex = 2;
+            this.uxClear.Text = "Clear";
+            this.uxClear.UseVisualStyleBackColor = true;
+            this.uxClear.Click += new System.EventHandler(this.uxClear_Click);
+            // 
             // uxMainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(458, 242);
+            this.Controls.Add(this.uxClear);
             this.Controls.Add(this.uxStatus);
             this.Controls.Add(this.uxCapture);
             this.Name = "uxMainWindow";
@@ -77,6 +89,7 @@ namespace AcrSolver
 
         private System.Windows.Forms.Button uxCapture;
         private System.Windows.Forms.TextBox uxStatus;
+        private System.Windows.Forms.Button uxClear;
     }
 }
 

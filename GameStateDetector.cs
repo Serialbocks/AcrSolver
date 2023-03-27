@@ -10,7 +10,7 @@ namespace AcrSolver
 {
     public static class GameStateDetector
     {
-        public static int FindButton(Bitmap screenshot)
+        public static int FindButton(Screenshot screenshot)
         {
             var matches = RunTemplateMatch(screenshot, "button.jpg");
             if (matches.Count == 0)
@@ -21,7 +21,7 @@ namespace AcrSolver
             return PlayerFromPoint(screenshot, matches[0]);
         }
 
-        public static int FindActivePlayer(Bitmap screenshot)
+        public static int FindActivePlayer(Screenshot screenshot)
         {
             var matches = RunTemplateMatch(screenshot, "player-active.jpg");
             if (matches.Count == 0)
@@ -32,7 +32,7 @@ namespace AcrSolver
             return PlayerFromPoint(screenshot, matches[0]);
         }
 
-        public static List<int> OpponentsWithCards(Bitmap screenshot)
+        public static List<int> OpponentsWithCards(Screenshot screenshot)
         {
             var result = new List<int>();
             var matches = RunTemplateMatch(screenshot, "opponent-has-cards.jpg");
@@ -53,16 +53,16 @@ namespace AcrSolver
                 .ToList();
         }
 
-        public static bool PlayerHasCards(Bitmap screenshot)
+        public static bool PlayerHasCards(Screenshot screenshot)
         {
             var matches = RunTemplateMatch(screenshot, "player-has-cards.jpg");
             return matches.Count > 0;
         }
 
-        private static int PlayerFromPoint(Bitmap screenshot, OpenCvSharp.Point point)
+        private static int PlayerFromPoint(Screenshot screenshot, OpenCvSharp.Point point)
         {
-            var third = screenshot.Width / 3;
-            if (point.Y > screenshot.Height / 2)
+            var third = screenshot.Bitmap.Width / 3;
+            if (point.Y > screenshot.Bitmap.Height / 2)
             {
                 // Seat 1, 2, or 6
                 if (point.X < third)
@@ -95,16 +95,12 @@ namespace AcrSolver
                 }
             }
         }
-        private static byte[] ImageToByte(Image img)
-        {
-            ImageConverter converter = new ImageConverter();
-            return (byte[])converter.ConvertTo(img, typeof(byte[]));
-        }
 
-        private static List<OpenCvSharp.Point> RunTemplateMatch(Bitmap reference, string template)
+
+        private static List<OpenCvSharp.Point> RunTemplateMatch(Screenshot reference, string template)
         {
             var matches = new List<OpenCvSharp.Point>();
-            using (Mat refMat = Mat.FromImageData(ImageToByte(reference)))
+            using (Mat refMat = Mat.FromImageData(reference.Bytes))
             using (Mat tplMat = new Mat(template))
             using (Mat res = new Mat(refMat.Rows - tplMat.Rows + 1, refMat.Cols - tplMat.Cols + 1, MatType.CV_32FC1))
             {
