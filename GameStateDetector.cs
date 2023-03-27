@@ -35,7 +35,7 @@ namespace AcrSolver
         public static List<int> OpponentsWithCards(Bitmap screenshot)
         {
             var result = new List<int>();
-            var matches = RunTemplateMatch(screenshot, "player-with-cards.jpg");
+            var matches = RunTemplateMatch(screenshot, "opponent-has-cards.jpg");
 
             foreach(var match in matches)
             {
@@ -51,6 +51,12 @@ namespace AcrSolver
                 .GroupBy(x => x)
                 .Select(x => x.First())
                 .ToList();
+        }
+
+        public static bool PlayerHasCards(Bitmap screenshot)
+        {
+            var matches = RunTemplateMatch(screenshot, "player-has-cards.jpg");
+            return matches.Count > 0;
         }
 
         private static int PlayerFromPoint(Bitmap screenshot, OpenCvSharp.Point point)

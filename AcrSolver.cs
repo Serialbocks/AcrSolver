@@ -47,16 +47,17 @@ namespace AcrSolver
 
             screenshot.Save("test.jpg", ImageFormat.Jpeg);
 
-            // Find the button!
             var buttonSeat = GameStateDetector.FindButton(screenshot);
             WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
 
-            // Find the active player
             var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
             WriteStatusLine(String.Format("Active player: {0}", activePlayer));
 
             var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
             WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
+
+            var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
+            WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
         }
     }
 }
