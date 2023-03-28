@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="IronOcr" Version="2023.3.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="OpenCvSharp4" Version="4.7.0.20230115" />
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.7.0.20230115" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />

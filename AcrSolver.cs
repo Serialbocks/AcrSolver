@@ -60,11 +60,11 @@ namespace AcrSolver
                 WriteStatusLine("Could not find game window");
                 return;
             }
-
+            
             var filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "screenshot.jpg");
-
+            
             screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
-
+            
             var buttonSeat = GameStateDetector.FindButton(screenshot);
             WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
             
