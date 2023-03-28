@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,14 +13,29 @@ namespace AcrSolver
 {
     public partial class uxMainWindow : Form
     {
+        private OCR _ocr;
         public uxMainWindow()
         {
             InitializeComponent();
+            _ocr = new OCR(WriteStatusLine);
+            Application.ApplicationExit += new EventHandler(OnApplicationExit);
+        }
+
+        private void OnApplicationExit(object sender, EventArgs e)
+        {
+            _ocr.Stop();
         }
 
         private void WriteStatusLine(string text)
         {
-            uxStatus.AppendText(text + "\r\n");
+            if(uxStatus.InvokeRequired)
+            {
+                uxStatus.Invoke(new Action(() => uxStatus.AppendText(text + "\r\n")));
+            }
+            else
+            {
+                uxStatus.AppendText(text + "\r\n");
+            }
         }
 
         private string FormatList(List<int> list)
@@ -45,7 +61,9 @@ namespace AcrSolver
                 return;
             }
 
-            screenshot.Bitmap.Save("test.jpg", ImageFormat.Jpeg);
+            var filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "screenshot.jpg");
+
+            screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
 
             var buttonSeat = GameStateDetector.FindButton(screenshot);
             WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
@@ -58,6 +76,8 @@ namespace AcrSolver
             
             var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
             WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
+
+            _ocr.Process(filename);
         }
 
         private void uxClear_Click(object sender, EventArgs e)

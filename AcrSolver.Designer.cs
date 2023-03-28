@@ -36,8 +36,7 @@ namespace AcrSolver
             // 
             // uxCapture
             // 
-            this.uxCapture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.uxCapture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.uxCapture.Location = new System.Drawing.Point(192, 207);
             this.uxCapture.Name = "uxCapture";
             this.uxCapture.Size = new System.Drawing.Size(75, 23);
@@ -62,6 +61,7 @@ namespace AcrSolver
             // 
             // uxClear
             // 
+            this.uxClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.uxClear.Location = new System.Drawing.Point(274, 207);
             this.uxClear.Name = "uxClear";
             this.uxClear.Size = new System.Drawing.Size(75, 23);
