@@ -206,6 +206,16 @@ namespace AcrSolver
             }
         };
 
+        private float _totalInPot = 0;
+
+        private BoundingBox _totalBox = new BoundingBox
+        {
+            X1 = 0.43111f,
+            X2 = 0.577452f,
+            Y1 = 0.370747f,
+            Y2 = 0.430977f
+        };
+
         public class BoundingBox
         {
             public float X1 { get; set; }
@@ -249,7 +259,13 @@ namespace AcrSolver
                             .Trim();
                         if (wordValue.Contains("$") || wordValue.Contains("BB"))
                         {
-                            var strippedValue = wordValue.Replace("$", "").Replace("BB", "");
+                            var strippedValue = wordValue
+                                .ToUpper()
+                                .Replace("TOTAL", "")
+                                .Replace(":", "")
+                                .Replace("$", "")
+                                .Replace("BB", "")
+                                .Trim();
                             float result;
                             if (float.TryParse(strippedValue, out result))
                             {
@@ -265,9 +281,9 @@ namespace AcrSolver
             {
                 var geometry = (JProperty)blockObj.First;
                 var boundingBox = GetBoundingBoxFromGeometry(geometry);
-                foreach(var seat in _seats)
+                var lines = blockObj.Children().First(x => ((JProperty)x).Name == "lines").First;
+                foreach (var seat in _seats)
                 {
-                    var lines = blockObj.Children().First(x => ((JProperty)x).Name == "lines").First;
                     if(seat.StackBoundingBox != null && boundingBox.IsWithin(seat.StackBoundingBox))
                     {
                         foreach (var line in lines)
@@ -287,6 +303,17 @@ namespace AcrSolver
                         }
                     }
                 }
+
+                foreach (var line in lines)
+                {
+                    var totalResult = ProcessLine(line, _totalBox);
+                    if (totalResult > 0)
+                    {
+                        _totalInPot = totalResult;
+                        break;
+                    }
+                }
+                
 
             }
 
@@ -315,6 +342,7 @@ namespace AcrSolver
                 PrintInfo(String.Format("Seat {0} stack {1} bet {2}", index, seat.Stack, seat.Bet));
                 index++;
             }
+            PrintInfo(String.Format("Total in pot: {0}", _totalInPot));
         }
 
         private void HandleStdout(string text)

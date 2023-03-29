@@ -85,10 +85,10 @@ namespace AcrSolver
             
             screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
 
-            var hand = GameStateDetector.GetPlayerHand(screenshot);
-            WriteStatusLine(String.Format("Player hand: {0}", FormatList(hand)));
+            //var hand = GameStateDetector.GetPlayerHand(screenshot);
+            //WriteStatusLine(String.Format("Player hand: {0}", FormatList(hand)));
 
-            //_ocr.Process(filename);
+            _ocr.Process(filename);
             //
             //var buttonSeat = GameStateDetector.FindButton(screenshot);
             //WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
