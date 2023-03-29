@@ -12,29 +12,38 @@ namespace AcrSolver
 {
     public static class GameStateDetector
     {
-        public static int FindButton(Screenshot screenshot)
+        public static void Update(Screenshot screenshot)
+        {
+            SetPlayerHand(screenshot);
+            SetBoard(screenshot);
+            SetButton(screenshot);
+            SetActivePlayer(screenshot);
+            SetOpponentsWithCards(screenshot);
+        }
+
+        private static void SetButton(Screenshot screenshot)
         {
             var matches = RunTemplateMatch(screenshot, "button.jpg");
             if (matches.Count == 0)
             {
-                return -1;
+                GameState.Button = -1;
             }
 
-            return PlayerFromPoint(screenshot, matches[0]);
+            GameState.Button = PlayerFromPoint(screenshot, matches[0]);
         }
 
-        public static int FindActivePlayer(Screenshot screenshot)
+        private static void SetActivePlayer(Screenshot screenshot)
         {
             var matches = RunTemplateMatch(screenshot, "player-active.jpg");
             if (matches.Count == 0)
             {
-                return -1;
+                GameState.ActivePlayer = -1;
             }
 
-            return PlayerFromPoint(screenshot, matches[0]);
+            GameState.ActivePlayer = PlayerFromPoint(screenshot, matches[0]);
         }
 
-        public static List<int> OpponentsWithCards(Screenshot screenshot)
+        private static void SetOpponentsWithCards(Screenshot screenshot)
         {
             var result = new List<int>();
             var matches = RunTemplateMatch(screenshot, "opponent-has-cards.jpg");
@@ -49,13 +58,20 @@ namespace AcrSolver
             }
 
             result.Sort();
-            return result
+            result = result
                 .GroupBy(x => x)
                 .Select(x => x.First())
                 .ToList();
+
+            GameState.ClearPlayerCards();
+            foreach (var item in result)
+            {
+                GameState.Seats[item-1].HasCards = true;
+            }
+            GameState.Seats[0].HasCards = PlayerHasCards(screenshot);
         }
 
-        public static bool PlayerHasCards(Screenshot screenshot)
+        private static bool PlayerHasCards(Screenshot screenshot)
         {
             var matches = RunTemplateMatch(screenshot, "player-has-cards.jpg");
             return matches.Count > 0;
@@ -66,9 +82,9 @@ namespace AcrSolver
         public static string _handDir = "cards/hand";
         public static string _boardDir = "cards/board";
 
-        public static List<string> GetPlayerHand(Screenshot screenshot)
+        private static void SetPlayerHand(Screenshot screenshot)
         {
-            var playerHand = new List<string>();
+            GameState.PlayerHand = new List<string>();
             var playerHandLock = new object();
             var tasks = new List<Task>();
             foreach (var cardValue in _cardValues)
@@ -77,24 +93,23 @@ namespace AcrSolver
                 {
                     tasks.Add(Task.Factory.StartNew(() =>
                     {
-                        var card = cardValue + suit;
+                        var card = cardValue.ToUpper() + suit;
                         var cardPath = Path.Combine(_handDir, String.Format("{0}.jpg", card));
 
                         var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
                         if (matches.Count > 0)
                         {
                             lock (playerHandLock)
-                                playerHand.Add(card);
+                                GameState.PlayerHand.Add(card);
                         }
                     }));
                 }
             }
-            return playerHand;
         }
 
-        public static List<string> GetBoard(Screenshot screenshot)
+        private static void SetBoard(Screenshot screenshot)
         {
-            var board = new List<string>();
+            GameState.Board = new List<string>();
             var boardLock = new object();
             var tasks = new List<Task>();
             foreach (var cardValue in _cardValues)
@@ -103,20 +118,19 @@ namespace AcrSolver
                 {
                     tasks.Add(Task.Factory.StartNew(() =>
                     {
-                        var card = cardValue + suit;
+                        var card = cardValue.ToUpper() + suit;
                         var cardPath = Path.Combine(_boardDir, String.Format("{0}.jpg", card));
 
                         var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
                         if (matches.Count > 0)
                         {
                             lock(boardLock)
-                                board.Add(card);
+                                GameState.Board.Add(card);
                         }
                     }));
                 }
             }
             Task.WaitAll(tasks.ToArray());
-            return board;
         }
 
         private static int PlayerFromPoint(Screenshot screenshot, OpenCvSharp.Point point)

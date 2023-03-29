@@ -14,6 +14,7 @@ namespace AcrSolver
     public class OCR
     {
         public delegate void PrintInfoDelegate(string text);
+        public delegate void NotifyCompleteDelegate();
 
         private const string _pythonPath = "../../../ocr.py";
         private const string _ocrOutFile = "ocr.json";
@@ -29,6 +30,7 @@ namespace AcrSolver
         private OCRState _state;
         private object stateLock = new object();
         private PrintInfoDelegate PrintInfo { get; set; }
+        private NotifyCompleteDelegate NotifyComplete { get; set; }
         private OCRState State { get
             {
                 lock(stateLock)
@@ -45,10 +47,11 @@ namespace AcrSolver
             }
         }
 
-        public OCR(PrintInfoDelegate printInfo)
+        public OCR(PrintInfoDelegate printInfo, NotifyCompleteDelegate notifyComplete)
         {
             State = OCRState.Initializing;
             PrintInfo = printInfo;
+            NotifyComplete = notifyComplete;
 
             PrintInfo("OCR Initializing...");
             _ocrProcess = new Process()
@@ -92,120 +95,6 @@ namespace AcrSolver
             }
         }
 
-        public class Seat
-        {
-            public float Bet { get; set; }
-            public float Stack { get; set; }
-            public BoundingBox BetBoundingBox { get; set; }
-            public BoundingBox StackBoundingBox { get; set; }
-        }
-
-        private List<Seat> _seats = new List<Seat>
-        {
-            new Seat
-            {
-                BetBoundingBox = new BoundingBox
-                {
-                    X1 = 0.39079f,
-                    X2 = 0.642398f,
-                    Y1 = 0.59339f,
-                    Y2 = 0.77155f
-                },
-                StackBoundingBox = new BoundingBox
-                {
-                    X1 = 0.44968f,
-                    X2 = 0.592077f,
-                    Y1 = 0.818966f,
-                    Y2 = 0.91092f
-                }
-            },
-            new Seat
-            {
-                BetBoundingBox = new BoundingBox
-                {
-                    X1 = 0.11135f,
-                    X2 = 0.384368f,
-                    Y1 = 0.497126f,
-                    Y2 = 0.75575f
-                },
-                StackBoundingBox = new BoundingBox
-                {
-                    X1 = 0.157388f,
-                    X2 = 0.304069f,
-                    Y1 = 0.739943f,
-                    Y2 = 0.824713f
-                }
-            },
-            new Seat
-            {
-                BetBoundingBox = new BoundingBox
-                {
-                    X1 = 0.09850f,
-                    X2 = 0.34475f,
-                    Y1 = 0.23707f,
-                    Y2 = 0.50431f
-                },
-                StackBoundingBox = new BoundingBox
-                {
-                    X1 = 0.0642398f,
-                    X2 = 0.208779f,
-                    Y1 = 0.275862f,
-                    Y2 = 0.3706897f
-                }
-            },
-            new Seat
-            {
-                BetBoundingBox = new BoundingBox
-                {
-                    X1 = 0.344754f,
-                    X2 = 0.6541756f,
-                    Y1 = 0.1781609f,
-                    Y2 = 0.382184f
-                },
-                StackBoundingBox = new BoundingBox
-                {
-                    X1 = 0.427195f,
-                    X2 = 0.572805f,
-                    Y1 = 0.193966f,
-                    Y2 = 0.2801724f
-                }
-            },
-            new Seat
-            {
-                BetBoundingBox = new BoundingBox
-                {
-                    X1 = 0.641328f,
-                    X2 = 0.8803419f,
-                    Y1 = 0.25f,
-                    Y2 = 0.5086207f
-                },
-                StackBoundingBox = new BoundingBox
-                {
-                    X1 = 0.79015f,
-                    X2 = 0.9346895f,
-                    Y1 = 0.2744253f,
-                    Y2 = 0.357759f
-                }
-            },
-            new Seat
-            {
-                StackBoundingBox = new BoundingBox
-                {
-                    X1 = 0.697002f,
-                    X2 = 0.8415418f,
-                    Y1 = 0.741379f,
-                    Y2 = 0.823276f
-                },
-                BetBoundingBox = new BoundingBox
-                {
-                    X1 = 0.6327623f,
-                    X2 = 0.920771f,
-                    Y1 = 0.49713f,
-                    Y2 = 0.7428161f
-                }
-            }
-        };
-
         private float _totalInPot = 0;
 
         private BoundingBox _totalBox = new BoundingBox
@@ -215,19 +104,6 @@ namespace AcrSolver
             Y1 = 0.370747f,
             Y2 = 0.430977f
         };
-
-        public class BoundingBox
-        {
-            public float X1 { get; set; }
-            public float Y1 { get; set; }
-            public float X2 { get; set; }
-            public float Y2 { get; set; }
-
-            public bool IsWithin(BoundingBox box)
-            {
-                return X1 > box.X1 && X2 < box.X2 && Y1 > box.Y1 && Y2 < box.Y2;
-            }
-        }
 
         private BoundingBox GetBoundingBoxFromGeometry(JProperty geometry)
         {
@@ -269,6 +145,14 @@ namespace AcrSolver
                             float result;
                             if (float.TryParse(strippedValue, out result))
                             {
+                                if(wordValue.Contains("BB"))
+                                {
+                                    GameState.AmountsInBB = true;
+                                }
+                                else
+                                {
+                                    GameState.AmountsInBB = false;
+                                }
                                 return result;
                             }
                         }
@@ -282,7 +166,7 @@ namespace AcrSolver
                 var geometry = (JProperty)blockObj.First;
                 var boundingBox = GetBoundingBoxFromGeometry(geometry);
                 var lines = blockObj.Children().First(x => ((JProperty)x).Name == "lines").First;
-                foreach (var seat in _seats)
+                foreach (var seat in GameState.Seats)
                 {
                     if(seat.StackBoundingBox != null && boundingBox.IsWithin(seat.StackBoundingBox))
                     {
@@ -309,18 +193,13 @@ namespace AcrSolver
                     var totalResult = ProcessLine(line, _totalBox);
                     if (totalResult > 0)
                     {
-                        _totalInPot = totalResult;
+                        GameState.Total = totalResult;
                         break;
                     }
                 }
-                
-
             }
 
-            foreach (var seat in _seats)
-            {
-                seat.Bet = 0;
-            }
+            GameState.ClearBets();
 
             var jObject = JObject.Parse(File.ReadAllText(_ocrOutFile));
             var pages = jObject.First;
@@ -337,12 +216,10 @@ namespace AcrSolver
             }
 
             var index = 1;
-            foreach(var seat in _seats)
+            foreach(var seat in GameState.Seats)
             {
-                PrintInfo(String.Format("Seat {0} stack {1} bet {2}", index, seat.Stack, seat.Bet));
                 index++;
             }
-            PrintInfo(String.Format("Total in pot: {0}", _totalInPot));
         }
 
         private void HandleStdout(string text)
@@ -356,6 +233,7 @@ namespace AcrSolver
                 case "Done":
                     ParseOCRData();
                     State = OCRState.Ready;
+                    NotifyComplete();
                     PrintInfo("OCR Done!");
                     break;
                 default:

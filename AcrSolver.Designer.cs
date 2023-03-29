@@ -50,6 +50,8 @@ namespace AcrSolver
             this.uxSeat6Bet = new System.Windows.Forms.Label();
             this.uxSeat6Stack = new System.Windows.Forms.Label();
             this.uxSeat6Cards = new System.Windows.Forms.Label();
+            this.uxBoard = new System.Windows.Forms.Label();
+            this.uxPot = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // uxCapture
@@ -249,11 +251,31 @@ namespace AcrSolver
             this.uxSeat6Cards.TabIndex = 18;
             this.uxSeat6Cards.Text = "HAS CARDS";
             // 
+            // uxBoard
+            // 
+            this.uxBoard.AutoSize = true;
+            this.uxBoard.Location = new System.Drawing.Point(228, 176);
+            this.uxBoard.Name = "uxBoard";
+            this.uxBoard.Size = new System.Drawing.Size(94, 15);
+            this.uxBoard.TabIndex = 21;
+            this.uxBoard.Text = "Ac Qc 10d Jd Qd";
+            // 
+            // uxPot
+            // 
+            this.uxPot.AutoSize = true;
+            this.uxPot.Location = new System.Drawing.Point(228, 207);
+            this.uxPot.Name = "uxPot";
+            this.uxPot.Size = new System.Drawing.Size(58, 15);
+            this.uxPot.TabIndex = 22;
+            this.uxPot.Text = "Pot: $5.50";
+            // 
             // uxMainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(801, 457);
+            this.Controls.Add(this.uxPot);
+            this.Controls.Add(this.uxBoard);
             this.Controls.Add(this.uxSeat6Bet);
             this.Controls.Add(this.uxSeat6Stack);
             this.Controls.Add(this.uxSeat6Cards);
@@ -305,6 +327,8 @@ namespace AcrSolver
         private System.Windows.Forms.Label uxSeat6Bet;
         private System.Windows.Forms.Label uxSeat6Stack;
         private System.Windows.Forms.Label uxSeat6Cards;
+        private System.Windows.Forms.Label uxBoard;
+        private System.Windows.Forms.Label uxPot;
     }
 }
 
