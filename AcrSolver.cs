@@ -88,7 +88,10 @@ namespace AcrSolver
             //var hand = GameStateDetector.GetPlayerHand(screenshot);
             //WriteStatusLine(String.Format("Player hand: {0}", FormatList(hand)));
 
-            _ocr.Process(filename);
+            var board = GameStateDetector.GetBoard(screenshot);
+            WriteStatusLine(String.Format("Board: {0}", FormatList(board)));
+
+            //_ocr.Process(filename);
             //
             //var buttonSeat = GameStateDetector.FindButton(screenshot);
             //WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));

@@ -62,7 +62,8 @@ namespace AcrSolver
 
         private static List<string> _cardValues = new List<string> { "a", "k", "q", "j", "10", "9", "8", "7", "6", "5", "4", "3", "2" };
         private static List<string> _cardSuits = new List<string> { "c", "d", "h", "s" };
-        public static string _cardDir = "cards/hand";
+        public static string _handDir = "cards/hand";
+        public static string _boardDir = "cards/board";
 
         public static List<string> GetPlayerHand(Screenshot screenshot)
         {
@@ -72,7 +73,7 @@ namespace AcrSolver
                 foreach(var suit in _cardSuits)
                 {
                     var card = cardValue + suit;
-                    var cardPath = Path.Combine(_cardDir, String.Format("{0}.jpg", card));
+                    var cardPath = Path.Combine(_handDir, String.Format("{0}.jpg", card));
 
                     var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
                     if(matches.Count > 0)
@@ -84,6 +85,26 @@ namespace AcrSolver
                 }
             }
             return playerHand;
+        }
+
+        public static List<string> GetBoard(Screenshot screenshot)
+        {
+            var board = new List<string>();
+            foreach (var cardValue in _cardValues)
+            {
+                foreach (var suit in _cardSuits)
+                {
+                    var card = cardValue + suit;
+                    var cardPath = Path.Combine(_boardDir, String.Format("{0}.jpg", card));
+
+                    var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
+                    if (matches.Count > 0)
+                    {
+                        board.Add(card);
+                    }
+                }
+            }
+            return board;
         }
 
         private static int PlayerFromPoint(Screenshot screenshot, OpenCvSharp.Point point)
