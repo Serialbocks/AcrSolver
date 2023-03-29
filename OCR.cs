@@ -119,7 +119,7 @@ namespace AcrSolver
                     Y2 = 0.91092f
                 }
             },
-            new Seat // 147, 515 to 284, 574
+            new Seat
             {
                 BetBoundingBox = new BoundingBox
                 {
@@ -155,15 +155,54 @@ namespace AcrSolver
             },
             new Seat
             {
-
+                BetBoundingBox = new BoundingBox
+                {
+                    X1 = 0.344754f,
+                    X2 = 0.6541756f,
+                    Y1 = 0.1781609f,
+                    Y2 = 0.382184f
+                },
+                StackBoundingBox = new BoundingBox
+                {
+                    X1 = 0.427195f,
+                    X2 = 0.572805f,
+                    Y1 = 0.193966f,
+                    Y2 = 0.2801724f
+                }
             },
             new Seat
             {
-
+                BetBoundingBox = new BoundingBox
+                {
+                    X1 = 0.641328f,
+                    X2 = 0.8803419f,
+                    Y1 = 0.25f,
+                    Y2 = 0.5086207f
+                },
+                StackBoundingBox = new BoundingBox
+                {
+                    X1 = 0.79015f,
+                    X2 = 0.9346895f,
+                    Y1 = 0.2744253f,
+                    Y2 = 0.357759f
+                }
             },
             new Seat
             {
-
+                StackBoundingBox = new BoundingBox
+                {
+                    X1 = 0.697002f,
+                    X2 = 0.8415418f,
+                    Y1 = 0.741379f,
+                    Y2 = 0.823276f
+                },
+                BetBoundingBox = new BoundingBox
+                {
+                    X1 = 0.6327623f,
+                    X2 = 0.920771f,
+                    Y1 = 0.49713f,
+                    Y2 = 0.7428161f
+                }
             }
         };
 

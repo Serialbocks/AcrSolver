@@ -26,7 +26,7 @@ for lineAll in sys.stdin:
 
     print_stdout('Writing')
     result = model(image_doc)
-    # result.show(image_doc)
+    #result.show(image_doc)
     with open('ocr.json', 'w') as f:
         f.write(json.dumps(result.export()))
     print_stdout('Done')
