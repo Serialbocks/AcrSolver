@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using OpenCvSharp;
 
 namespace AcrSolver
@@ -68,20 +69,24 @@ namespace AcrSolver
         public static List<string> GetPlayerHand(Screenshot screenshot)
         {
             var playerHand = new List<string>();
-            foreach(var cardValue in _cardValues)
+            var playerHandLock = new object();
+            var tasks = new List<Task>();
+            foreach (var cardValue in _cardValues)
             {
                 foreach(var suit in _cardSuits)
                 {
-                    var card = cardValue + suit;
-                    var cardPath = Path.Combine(_handDir, String.Format("{0}.jpg", card));
-
-                    var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
-                    if(matches.Count > 0)
+                    tasks.Add(Task.Factory.StartNew(() =>
                     {
-                        playerHand.Add(card);
-                        //if (playerHand.Count >= 2)
-                        //    return playerHand;
-                    }
+                        var card = cardValue + suit;
+                        var cardPath = Path.Combine(_handDir, String.Format("{0}.jpg", card));
+
+                        var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
+                        if (matches.Count > 0)
+                        {
+                            lock (playerHandLock)
+                                playerHand.Add(card);
+                        }
+                    }));
                 }
             }
             return playerHand;
@@ -90,20 +95,27 @@ namespace AcrSolver
         public static List<string> GetBoard(Screenshot screenshot)
         {
             var board = new List<string>();
+            var boardLock = new object();
+            var tasks = new List<Task>();
             foreach (var cardValue in _cardValues)
             {
                 foreach (var suit in _cardSuits)
                 {
-                    var card = cardValue + suit;
-                    var cardPath = Path.Combine(_boardDir, String.Format("{0}.jpg", card));
-
-                    var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
-                    if (matches.Count > 0)
+                    tasks.Add(Task.Factory.StartNew(() =>
                     {
-                        board.Add(card);
-                    }
+                        var card = cardValue + suit;
+                        var cardPath = Path.Combine(_boardDir, String.Format("{0}.jpg", card));
+
+                        var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
+                        if (matches.Count > 0)
+                        {
+                            lock(boardLock)
+                                board.Add(card);
+                        }
+                    }));
                 }
             }
+            Task.WaitAll(tasks.ToArray());
             return board;
         }
 

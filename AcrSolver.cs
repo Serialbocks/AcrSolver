@@ -85,25 +85,25 @@ namespace AcrSolver
             
             screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
 
-            //var hand = GameStateDetector.GetPlayerHand(screenshot);
-            //WriteStatusLine(String.Format("Player hand: {0}", FormatList(hand)));
+            _ocr.Process(filename);
+
+            var hand = GameStateDetector.GetPlayerHand(screenshot);
+            WriteStatusLine(String.Format("Player hand: {0}", FormatList(hand)));
 
             var board = GameStateDetector.GetBoard(screenshot);
             WriteStatusLine(String.Format("Board: {0}", FormatList(board)));
-
-            //_ocr.Process(filename);
-            //
-            //var buttonSeat = GameStateDetector.FindButton(screenshot);
-            //WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
-            //
-            //var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
-            //WriteStatusLine(String.Format("Active player: {0}", activePlayer));
-            //
-            //var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
-            //WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
-            //
-            //var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
-            //WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
+            
+            var buttonSeat = GameStateDetector.FindButton(screenshot);
+            WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
+            
+            var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
+            WriteStatusLine(String.Format("Active player: {0}", activePlayer));
+            
+            var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
+            WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
+            
+            var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
+            WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
         }
 
         private void uxClear_Click(object sender, EventArgs e)
