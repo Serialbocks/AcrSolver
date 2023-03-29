@@ -37,7 +37,7 @@ namespace AcrSolver
             // uxCapture
             // 
             this.uxCapture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.uxCapture.Location = new System.Drawing.Point(192, 207);
+            this.uxCapture.Location = new System.Drawing.Point(192, 420);
             this.uxCapture.Name = "uxCapture";
             this.uxCapture.Size = new System.Drawing.Size(75, 23);
             this.uxCapture.TabIndex = 0;
@@ -56,13 +56,13 @@ namespace AcrSolver
             this.uxStatus.Name = "uxStatus";
             this.uxStatus.ReadOnly = true;
             this.uxStatus.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.uxStatus.Size = new System.Drawing.Size(434, 182);
+            this.uxStatus.Size = new System.Drawing.Size(434, 395);
             this.uxStatus.TabIndex = 1;
             // 
             // uxClear
             // 
             this.uxClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.uxClear.Location = new System.Drawing.Point(274, 207);
+            this.uxClear.Location = new System.Drawing.Point(274, 420);
             this.uxClear.Name = "uxClear";
             this.uxClear.Size = new System.Drawing.Size(75, 23);
             this.uxClear.TabIndex = 2;
@@ -74,7 +74,7 @@ namespace AcrSolver
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 242);
+            this.ClientSize = new System.Drawing.Size(458, 455);
             this.Controls.Add(this.uxClear);
             this.Controls.Add(this.uxStatus);
             this.Controls.Add(this.uxCapture);

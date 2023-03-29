@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -59,6 +60,32 @@ namespace AcrSolver
             return matches.Count > 0;
         }
 
+        private static List<string> _cardValues = new List<string> { "a", "k", "q", "j", "10", "9", "8", "7", "6", "5", "4", "3", "2" };
+        private static List<string> _cardSuits = new List<string> { "c", "d", "h", "s" };
+        public static string _cardDir = "cards/hand";
+
+        public static List<string> GetPlayerHand(Screenshot screenshot)
+        {
+            var playerHand = new List<string>();
+            foreach(var cardValue in _cardValues)
+            {
+                foreach(var suit in _cardSuits)
+                {
+                    var card = cardValue + suit;
+                    var cardPath = Path.Combine(_cardDir, String.Format("{0}.jpg", card));
+
+                    var matches = RunTemplateMatch(screenshot, cardPath, 0.96);
+                    if(matches.Count > 0)
+                    {
+                        playerHand.Add(card);
+                        //if (playerHand.Count >= 2)
+                        //    return playerHand;
+                    }
+                }
+            }
+            return playerHand;
+        }
+
         private static int PlayerFromPoint(Screenshot screenshot, OpenCvSharp.Point point)
         {
             var third = screenshot.Bitmap.Width / 3;
@@ -96,20 +123,31 @@ namespace AcrSolver
             }
         }
 
+        private static List<OpenCvSharp.Point> RunTemplateMatch(string reference, string template, double threshold = 0.9)
+        {
+            using (Mat refMat = new Mat(reference))
+            using (Mat tplMat = new Mat(template))
+                return RunTemplateMatch(refMat, tplMat, threshold);
+        }
 
-        private static List<OpenCvSharp.Point> RunTemplateMatch(Screenshot reference, string template)
+        private static List<OpenCvSharp.Point> RunTemplateMatch(Screenshot reference, string template, double threshold = 0.9)
         {
             var matches = new List<OpenCvSharp.Point>();
             using (Mat refMat = Mat.FromImageData(reference.Bytes))
             using (Mat tplMat = new Mat(template))
+                return RunTemplateMatch(refMat, tplMat, threshold);
+        }
+
+        private static List<OpenCvSharp.Point> RunTemplateMatch(Mat refMat, Mat tplMat, double threshold)
+        {
+            var matches = new List<OpenCvSharp.Point>();
             using (Mat res = new Mat(refMat.Rows - tplMat.Rows + 1, refMat.Cols - tplMat.Cols + 1, MatType.CV_32FC1))
             {
                 //Convert input images to gray
                 Mat gref = refMat.CvtColor(ColorConversionCodes.BGR2GRAY);
                 Mat gtpl = tplMat.CvtColor(ColorConversionCodes.BGR2GRAY);
 
-                double threshold = 0.9;
-                Cv2.MatchTemplate(gref, gtpl, res, TemplateMatchModes.CCoeffNormed);
+                Cv2.MatchTemplate(refMat, tplMat, res, TemplateMatchModes.CCoeffNormed);
                 Cv2.Threshold(res, res, threshold, 1.0, ThresholdTypes.Tozero);
 
                 while (true)
@@ -139,7 +177,6 @@ namespace AcrSolver
                 return matches;
             }
         }
-
        
     }
 }

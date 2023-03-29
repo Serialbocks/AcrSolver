@@ -312,10 +312,7 @@ namespace AcrSolver
             var index = 1;
             foreach(var seat in _seats)
             {
-                if(seat.Bet > 0)
-                {
-                    PrintInfo(String.Format("Seat {0} bet ${1}", index, seat.Bet));
-                }
+                PrintInfo(String.Format("Seat {0} stack {1} bet {2}", index, seat.Stack, seat.Bet));
                 index++;
             }
         }

@@ -52,6 +52,20 @@ namespace AcrSolver
             return result;
         }
 
+        private string FormatList(List<string> list)
+        {
+            string result = "";
+            foreach (var number in list)
+            {
+                result += number + ", ";
+            }
+            if (result.Length > 1)
+            {
+                result = result.Substring(0, result.Length - 2);
+            }
+            return result;
+        }
+
         private void uxCapture_Click(object sender, EventArgs e)
         {
             var screenshot = ScreenshotUtils.PrintWindow();
@@ -62,22 +76,31 @@ namespace AcrSolver
             }
             
             var filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "screenshot.jpg");
+            //int index = 1;
+            //while(File.Exists(filename))
+            //{
+            //    filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), String.Format("screenshot-{0}.jpg", index));
+            //    index++;
+            //}
             
             screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
-            
-            var buttonSeat = GameStateDetector.FindButton(screenshot);
-            WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
-            
-            var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
-            WriteStatusLine(String.Format("Active player: {0}", activePlayer));
-            
-            var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
-            WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
-            
-            var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
-            WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
 
-            _ocr.Process(filename);
+            var hand = GameStateDetector.GetPlayerHand(screenshot);
+            WriteStatusLine(String.Format("Player hand: {0}", FormatList(hand)));
+
+            //_ocr.Process(filename);
+            //
+            //var buttonSeat = GameStateDetector.FindButton(screenshot);
+            //WriteStatusLine(String.Format("Button at seat {0}", buttonSeat));
+            //
+            //var activePlayer = GameStateDetector.FindActivePlayer(screenshot);
+            //WriteStatusLine(String.Format("Active player: {0}", activePlayer));
+            //
+            //var opponentsWithCards = GameStateDetector.OpponentsWithCards(screenshot);
+            //WriteStatusLine(String.Format("Opponents with cards: {0}", FormatList(opponentsWithCards)));
+            //
+            //var playerHasCards = GameStateDetector.PlayerHasCards(screenshot);
+            //WriteStatusLine(String.Format("Player has cards: {0}", playerHasCards));
         }
 
         private void uxClear_Click(object sender, EventArgs e)
