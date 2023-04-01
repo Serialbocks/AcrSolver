@@ -245,7 +245,7 @@ namespace AcrSolver
             // uxSeat6Cards
             // 
             this.uxSeat6Cards.AutoSize = true;
-            this.uxSeat6Cards.Location = new System.Drawing.Point(440, 294);
+            this.uxSeat6Cards.Location = new System.Drawing.Point(431, 294);
             this.uxSeat6Cards.Name = "uxSeat6Cards";
             this.uxSeat6Cards.Size = new System.Drawing.Size(70, 15);
             this.uxSeat6Cards.TabIndex = 18;

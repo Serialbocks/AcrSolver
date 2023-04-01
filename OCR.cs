@@ -29,8 +29,8 @@ namespace AcrSolver
         private Process _ocrProcess;
         private OCRState _state;
         private object stateLock = new object();
-        private PrintInfoDelegate PrintInfo { get; set; }
-        private NotifyCompleteDelegate NotifyComplete { get; set; }
+        private PrintInfoDelegate _printInfo;
+        private NotifyCompleteDelegate _notifycomplete;
         private OCRState State { get
             {
                 lock(stateLock)
@@ -50,10 +50,10 @@ namespace AcrSolver
         public OCR(PrintInfoDelegate printInfo, NotifyCompleteDelegate notifyComplete)
         {
             State = OCRState.Initializing;
-            PrintInfo = printInfo;
-            NotifyComplete = notifyComplete;
+            _printInfo = printInfo;
+            _notifycomplete = notifyComplete;
 
-            PrintInfo("OCR Initializing...");
+            _printInfo("OCR Initializing...");
             _ocrProcess = new Process()
             {
                 StartInfo = new ProcessStartInfo
@@ -80,10 +80,10 @@ namespace AcrSolver
         {
             if(State != OCRState.Ready)
             {
-                PrintInfo("Tried to process OCR in an unready state");
+                _printInfo("Tried to process OCR in an unready state");
                 return;
             }
-            PrintInfo("OCR Processing...");
+            _printInfo("OCR Processing...");
             _ocrProcess.StandardInput.WriteLine(file);
         }
 
@@ -94,8 +94,6 @@ namespace AcrSolver
                 _ocrProcess.Kill();
             }
         }
-
-        private float _totalInPot = 0;
 
         private BoundingBox _totalBox = new BoundingBox
         {
@@ -199,7 +197,7 @@ namespace AcrSolver
                 }
             }
 
-            GameState.ClearBets();
+            GameState.ClearSeatBets();
 
             var jObject = JObject.Parse(File.ReadAllText(_ocrOutFile));
             var pages = jObject.First;
@@ -215,11 +213,7 @@ namespace AcrSolver
                 ProcessBlock(blockObj);
             }
 
-            var index = 1;
-            foreach(var seat in GameState.Seats)
-            {
-                index++;
-            }
+            GameState.UpdateCurrentBets();
         }
 
         private void HandleStdout(string text)
@@ -228,13 +222,13 @@ namespace AcrSolver
             {
                 case "Ready":
                     State = OCRState.Ready;
-                    PrintInfo("OCR Ready!");
+                    _printInfo("OCR Ready!");
                     break;
                 case "Done":
                     ParseOCRData();
                     State = OCRState.Ready;
-                    NotifyComplete();
-                    PrintInfo("OCR Done!");
+                    _notifycomplete();
+                    _printInfo("OCR Done!");
                     break;
                 default:
                     break;

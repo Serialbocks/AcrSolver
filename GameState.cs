@@ -8,11 +8,26 @@ namespace AcrSolver
 {
     public class Seat
     {
-        public float Bet { get; set; }
+        public float Bet {
+            get
+            {
+                return _bet;
+            }
+            set
+            {
+                if (value != _bet)
+                    BetUpdated = true;
+                _bet = value;
+            }
+        }
         public float Stack { get; set; }
         public bool HasCards { get; set; }
         public BoundingBox BetBoundingBox { get; set; }
         public BoundingBox StackBoundingBox { get; set; }
+        public Position Position { get; set; }
+        public bool BetUpdated { get; set; }
+
+        private float _bet;
     }
 
     public class BoundingBox
@@ -28,6 +43,77 @@ namespace AcrSolver
         }
     }
 
+    public enum BoardState
+    {
+        Preflop,
+        Flop,
+        Turn,
+        River,
+        Error
+    }
+
+    public enum Position
+    {
+        SB,
+        BB,
+        UTG,
+        MP,
+        CO,
+        BTN
+    }
+
+    public enum BetType
+    {
+        Bet,
+        Call,
+        Raise
+    }
+
+    public class Bet
+    {
+        public float Amount { get; set; }
+        public Position Position { get; set; }
+        public BetType Type { get; set; }
+        public int PreflopOrder()
+        {
+            var order = 0;
+            switch (Position)
+            {
+                case Position.BTN:
+                    order = 3;
+                    break;
+                case Position.SB:
+                    order = 4;
+                    break;
+                case Position.BB:
+                    order = 5;
+                    break;
+                case Position.UTG:
+                    order = 0;
+                    break;
+                case Position.MP:
+                    order = 1;
+                    break;
+                case Position.CO:
+                    order = 2;
+                    break;
+                default:
+                    break;
+            }
+            return order;
+        }
+
+        public override bool Equals(object betObj)
+        {
+            var bet = (Bet)betObj;
+            return this.Position == bet.Position && this.Amount == bet.Amount;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+    }
 
     public static class GameState
     {
@@ -136,9 +222,36 @@ namespace AcrSolver
                 }
             }
         };
+        public static List<Bet> Bets { get; set; } = new List<Bet>();
+        public static Bet CurrentBet { get
+            {
+                if (Bets.Count == 0)
+                    return null;
+                return Bets[Bets.Count - 1];
+            }
+        }
         public static bool AmountsInBB { get; set; }
         public static float Total { get; set; }
-        public static int Button { get; set; }
+        public static int Button { get
+            {
+                return _button;
+            }
+            set
+            {
+                if (value < 0)
+                    return;
+                _button = value;
+                var buttonIndex = Button;
+                if (buttonIndex < 0)
+                    buttonIndex = 0;
+
+                for(int i = 0; i < Seats.Count; i++)
+                {
+                    var currentIndex = (i + buttonIndex) % Seats.Count;
+                    Seats[currentIndex].Position = (Position)i;
+                }
+            }
+        }
         public static int ActivePlayer { get; set; }
         public static float Pot { get
             {
@@ -151,13 +264,125 @@ namespace AcrSolver
             }
         }
         public static List<string> PlayerHand { get; set; } = new List<string>();
-        public static List<string> Board { get; set; } = new List<string>();
+        public static List<string> Board
+        {
+            get
+            {
+                return _board;
+            }
+            set
+            {
+                if(_board.Count >= 3 && value.Count > _board.Count)
+                {
+                    foreach(var card in value)
+                    {
+                        if(_board.FirstOrDefault(x => x == card) == null)
+                        {
+                            _board.Add(card);
+                        }
+                    }
+                }
+                else
+                {
+                    _board = value;
+                }
+                ClearCurrentBets();
+            }
+        }
+        public static BoardState BoardState
+        {
+            get
+            {
+                switch(Board.Count)
+                {
+                    case 0:
+                        return BoardState.Preflop;
+                    case 1:
+                    case 2:
+                        return BoardState.Error;
+                    case 3:
+                        return BoardState.Flop;
+                    case 4:
+                        return BoardState.Turn;
+                    case 5:
+                        return BoardState.River;
+                    default:
+                        return BoardState.Error;
+                }
+            }
+        }
 
-        public static void ClearBets()
+        private static List<string> _board { get; set; } = new List<string>();
+
+        private static int _button { get; set; } = -1;
+
+        public static void ClearCurrentBets()
+        {
+            Bets = new List<Bet>();
+        }
+
+        public static Position PlayerPosition()
+        {
+            return Seats[0].Position;
+        }
+
+        public static void UpdateCurrentBets()
+        {
+            var newBets = new List<Bet>();
+            foreach(var seat in Seats)
+            {
+                if (seat.Bet <= 0 || !seat.BetUpdated)
+                    continue;
+
+                newBets.Add(new Bet
+                {
+                    Amount = seat.Bet,
+                    Position = seat.Position
+                });
+                seat.BetUpdated = false;
+            }
+
+            if(BoardState == BoardState.Preflop)
+            {
+                newBets = newBets.OrderBy(x => x.PreflopOrder()).OrderBy(x => x.Amount).ToList();
+                if (newBets.Count > 0 && newBets[0].Amount <= 0.5f)
+                {
+                    newBets = newBets.Skip(1).ToList();
+                }
+                if(newBets.Count > 0 && newBets[0].Amount == 1.0f)
+                {
+                    newBets = newBets.Skip(1).ToList();
+                }
+            }
+            else
+            {
+                newBets = newBets.OrderBy(x => x.Position).OrderBy(x => x.Amount).ToList();
+            }
+
+            foreach(var bet in newBets)
+            {
+                if(Bets.Count == 0)
+                {
+                    bet.Type = BetType.Bet;
+                }
+                else if(Bets[Bets.Count - 1].Amount == bet.Amount)
+                {
+                    bet.Type = BetType.Call;
+                }
+                else
+                {
+                    bet.Type = BetType.Raise;
+                }
+                Bets.Add(bet);
+            }
+        }
+        
+        public static void ClearSeatBets()
         {
             foreach (var seat in Seats)
             {
                 seat.Bet = 0;
+                seat.BetUpdated = false;
             }
         }
 
@@ -179,6 +404,15 @@ namespace AcrSolver
             {
                 return amount.ToString("c2");
             }
+        }
+
+        public static T NextPosition<T>(this T src) where T : struct
+        {
+            if (!typeof(T).IsEnum) throw new ArgumentException(String.Format("Argument {0} is not an Enum", typeof(T).FullName));
+
+            T[] Arr = (T[])Enum.GetValues(src.GetType());
+            int j = Array.IndexOf<T>(Arr, src) + 1;
+            return (Arr.Length == j) ? Arr[0] : Arr[j];
         }
     }
 }

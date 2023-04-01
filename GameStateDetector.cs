@@ -26,10 +26,11 @@ namespace AcrSolver
             var matches = RunTemplateMatch(screenshot, "button.jpg");
             if (matches.Count == 0)
             {
-                GameState.Button = -1;
+                return;
             }
+            var newButton = PlayerFromPoint(screenshot, matches[0]);
 
-            GameState.Button = PlayerFromPoint(screenshot, matches[0]);
+            GameState.Button = newButton;
         }
 
         private static void SetActivePlayer(Screenshot screenshot)
@@ -109,7 +110,7 @@ namespace AcrSolver
 
         private static void SetBoard(Screenshot screenshot)
         {
-            GameState.Board = new List<string>();
+            var newBoard = new List<string>();
             var boardLock = new object();
             var tasks = new List<Task>();
             foreach (var cardValue in _cardValues)
@@ -125,12 +126,14 @@ namespace AcrSolver
                         if (matches.Count > 0)
                         {
                             lock(boardLock)
-                                GameState.Board.Add(card);
+                                newBoard.Add(card);
                         }
                     }));
                 }
             }
             Task.WaitAll(tasks.ToArray());
+
+            GameState.Board = newBoard;
         }
 
         private static int PlayerFromPoint(Screenshot screenshot, OpenCvSharp.Point point)

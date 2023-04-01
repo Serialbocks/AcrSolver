@@ -14,10 +14,12 @@ namespace AcrSolver
     public partial class uxMainWindow : Form
     {
         private OCR _ocr;
+        private TexasSolver _texasSolver;
         public uxMainWindow()
         {
             InitializeComponent();
-            _ocr = new OCR(WriteStatusLine, UpdateUX);
+            _ocr = new OCR(WriteStatusLine, OnOcrProcessComplete);
+            _texasSolver = new TexasSolver(WriteStatusLine, OnTexasSolveComplete);
             UpdateUX();
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
         }
@@ -25,6 +27,17 @@ namespace AcrSolver
         private void OnApplicationExit(object sender, EventArgs e)
         {
             _ocr.Stop();
+            _texasSolver.Stop();
+        }
+
+        private void OnTexasSolveComplete()
+        {
+
+        }
+
+        private void OnOcrProcessComplete()
+        {
+            UpdateUX();
         }
 
         private void UpdateUX()
@@ -43,8 +56,13 @@ namespace AcrSolver
             // Update board
             SetLabelText(uxBoard, FormatList(GameState.Board));
 
+            foreach (var bet in GameState.Bets)
+            {
+                WriteStatusLine(String.Format("Position {0} {1} {2}", bet.Position, bet.Type.ToString(), bet.Amount));
+            }
+
             // Update seats
-            for(int seatIndex = 0; seatIndex < GameState.Seats.Count; seatIndex++)
+            for (int seatIndex = 0; seatIndex < GameState.Seats.Count; seatIndex++)
             {
                 var seat = GameState.Seats[seatIndex];
                 Label betLabel = null;
