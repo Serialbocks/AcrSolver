@@ -97,6 +97,7 @@ namespace AcrSolver
         public Range Range { get; set; }
 
         public float? RaiseVal { get; set; }
+        public bool IsFoldNode { get; set; }
 
         public PreflopRangeNode UTGRaise { get; set; }
         public PreflopRangeNode UTGCall { get; set; }
@@ -147,6 +148,61 @@ namespace AcrSolver
             PopulateFolderRanges(threeBetPath, positionRoot);
             PopulateFolderRanges(fourBetPath, positionRoot);
             PopulateFolderRanges(fiveBetPath, positionRoot);
+
+            BringUpFoldRanges(positionRoot);
+        }
+
+        private void BringUpFoldRanges(PreflopRangeNode node)
+        {
+            if (node == null)
+                return;
+
+            BringUpFoldRanges(node.UTGCall);
+            BringUpFoldRanges(node.UTGFold);
+            BringUpFoldRanges(node.UTGRaise);
+            BringUpFoldRanges(node.MPCall);
+            BringUpFoldRanges(node.MPFold);
+            BringUpFoldRanges(node.MPRaise);
+            BringUpFoldRanges(node.COCall);
+            BringUpFoldRanges(node.COFold);
+            BringUpFoldRanges(node.CORaise);
+            BringUpFoldRanges(node.BTNCall);
+            BringUpFoldRanges(node.BTNFold);
+            BringUpFoldRanges(node.BTNRaise);
+            BringUpFoldRanges(node.SBCall);
+            BringUpFoldRanges(node.SBFold);
+            BringUpFoldRanges(node.SBRaise);
+            BringUpFoldRanges(node.BBCall);
+            BringUpFoldRanges(node.BBFold);
+            BringUpFoldRanges(node.BBRaise);
+
+            if (!node.IsFoldNode || node.ParentNode == null)
+            {
+                return;
+            }
+
+            var parentNode = node.ParentNode;
+            if(parentNode.Range == null)
+                parentNode.Range = node.Range;
+
+            parentNode.UTGCall = node.UTGCall;
+            parentNode.UTGFold = node.UTGFold;
+            parentNode.UTGRaise = node.UTGRaise;
+            parentNode.MPCall = node.MPCall;
+            parentNode.MPFold = node.MPFold;
+            parentNode.MPRaise = node.MPRaise;
+            parentNode.COCall = node.COCall;
+            parentNode.COFold = node.COFold;
+            parentNode.CORaise = node.CORaise;
+            parentNode.BTNCall = node.BTNCall;
+            parentNode.BTNFold = node.BTNFold;
+            parentNode.BTNRaise = node.BTNRaise;
+            parentNode.SBCall = node.SBCall;
+            parentNode.SBFold = node.SBFold;
+            parentNode.SBRaise = node.SBRaise;
+            parentNode.BBCall = node.BBCall;
+            parentNode.BBFold = node.BBFold;
+            parentNode.BBRaise = node.BBRaise;
         }
 
         private PreflopRangeNode GetNodeFromPositionAction(string position, string action, PreflopRangeNode root, bool forceNewIfNull = false)
@@ -164,7 +220,7 @@ namespace AcrSolver
                             break;
                         case "FOLD":
                             if (forceNewIfNull && root.UTGFold == null)
-                                root.UTGFold = new PreflopRangeNode();
+                                root.UTGFold = new PreflopRangeNode() { IsFoldNode = true };
                             node = root.UTGFold;
                             break;
                         case "AllIn":
@@ -198,7 +254,7 @@ namespace AcrSolver
                             break;
                         case "FOLD":
                             if (forceNewIfNull && root.MPFold == null)
-                                root.MPFold = new PreflopRangeNode();
+                                root.MPFold = new PreflopRangeNode() { IsFoldNode = true };
                             node = root.MPFold;
                             break;
                         case "AllIn":
@@ -232,7 +288,7 @@ namespace AcrSolver
                             break;
                         case "FOLD":
                             if (forceNewIfNull && root.COFold == null)
-                                root.COFold = new PreflopRangeNode();
+                                root.COFold = new PreflopRangeNode() { IsFoldNode = true };
                             node = root.COFold;
                             break;
                         case "AllIn":
@@ -266,7 +322,7 @@ namespace AcrSolver
                             break;
                         case "FOLD":
                             if (forceNewIfNull && root.BTNFold == null)
-                                root.BTNFold = new PreflopRangeNode();
+                                root.BTNFold = new PreflopRangeNode() { IsFoldNode = true };
                             node = root.BTNFold;
                             break;
                         case "AllIn":
@@ -300,7 +356,7 @@ namespace AcrSolver
                             break;
                         case "FOLD":
                             if (forceNewIfNull && root.SBFold == null)
-                                root.SBFold = new PreflopRangeNode();
+                                root.SBFold = new PreflopRangeNode() { IsFoldNode = true };
                             node = root.SBFold;
                             break;
                         case "AllIn":
@@ -334,7 +390,7 @@ namespace AcrSolver
                             break;
                         case "FOLD":
                             if (forceNewIfNull && root.BBFold == null)
-                                root.BBFold = new PreflopRangeNode();
+                                root.BBFold = new PreflopRangeNode() { IsFoldNode = true };
                             node = root.BBFold;
                             break;
                         case "AllIn":
