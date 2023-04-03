@@ -38,6 +38,7 @@ namespace AcrSolver
         private void OnOcrProcessComplete()
         {
             UpdateUX();
+            _texasSolver.ShowHandRange();
         }
 
         private void UpdateUX()
