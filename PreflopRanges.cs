@@ -154,30 +154,27 @@ namespace AcrSolver
 
     public class PreflopRangeNode
     {
+        public class PositionRanges
+        {
+            public PreflopRangeNode Raise { get; set; }
+            public PreflopRangeNode Call { get; set; }
+            public PreflopRangeNode Fold { get; set; }
+        }
+
+        public PreflopRangeNode()
+        {
+            foreach(var position in (Position[])Enum.GetValues(typeof(Position)))
+            {
+                Children.Add(position, new PositionRanges());
+            }
+        }
 
         public Range Range { get; set; }
 
         public float? RaiseVal { get; set; }
         public bool IsFoldNode { get; set; }
 
-        public PreflopRangeNode UTGRaise { get; set; }
-        public PreflopRangeNode UTGCall { get; set; }
-        public PreflopRangeNode UTGFold { get; set; }
-        public PreflopRangeNode MPRaise { get; set; }
-        public PreflopRangeNode MPCall { get; set; }
-        public PreflopRangeNode MPFold { get; set; }
-        public PreflopRangeNode CORaise { get; set; }
-        public PreflopRangeNode COCall { get; set; }
-        public PreflopRangeNode COFold { get; set; }
-        public PreflopRangeNode BTNRaise { get; set; }
-        public PreflopRangeNode BTNCall { get; set; }
-        public PreflopRangeNode BTNFold { get; set; }
-        public PreflopRangeNode SBRaise { get; set; }
-        public PreflopRangeNode SBCall { get; set; }
-        public PreflopRangeNode SBFold { get; set; }
-        public PreflopRangeNode BBRaise { get; set; }
-        public PreflopRangeNode BBCall { get; set; }
-        public PreflopRangeNode BBFold { get; set; }
+        public Dictionary<Position, PositionRanges> Children { get; set; } = new Dictionary<Position, PositionRanges>();
 
         public PreflopRangeNode ParentNode { get; set; }
     }
@@ -205,13 +202,13 @@ namespace AcrSolver
                 switch(bet.Type)
                 {
                     case BetType.Bet:
-                        currentNode = GetNodeFromPositionAction(bet.Position.ToString(), "Raise", currentNode);
+                        currentNode = GetNodeFromPositionAction(bet.Position, "Raise", currentNode);
                         break;
                     case BetType.Call:
-                        currentNode = GetNodeFromPositionAction(bet.Position.ToString(), "Call", currentNode);
+                        currentNode = GetNodeFromPositionAction(bet.Position, "Call", currentNode);
                         break;
                     case BetType.Raise:
-                        currentNode = GetNodeFromPositionAction(bet.Position.ToString(), "Raise", currentNode);
+                        currentNode = GetNodeFromPositionAction(bet.Position, "Raise", currentNode);
                         break;
                     default:
                         throw new Exception("Invalid bet type");
@@ -247,24 +244,13 @@ namespace AcrSolver
             if (node == null)
                 return;
 
-            BringUpFoldRanges(node.UTGCall);
-            BringUpFoldRanges(node.UTGFold);
-            BringUpFoldRanges(node.UTGRaise);
-            BringUpFoldRanges(node.MPCall);
-            BringUpFoldRanges(node.MPFold);
-            BringUpFoldRanges(node.MPRaise);
-            BringUpFoldRanges(node.COCall);
-            BringUpFoldRanges(node.COFold);
-            BringUpFoldRanges(node.CORaise);
-            BringUpFoldRanges(node.BTNCall);
-            BringUpFoldRanges(node.BTNFold);
-            BringUpFoldRanges(node.BTNRaise);
-            BringUpFoldRanges(node.SBCall);
-            BringUpFoldRanges(node.SBFold);
-            BringUpFoldRanges(node.SBRaise);
-            BringUpFoldRanges(node.BBCall);
-            BringUpFoldRanges(node.BBFold);
-            BringUpFoldRanges(node.BBRaise);
+            foreach(var position in (Position[])Enum.GetValues(typeof(Position)))
+            {
+                var positionRanges = node.Children[position];
+                BringUpFoldRanges(positionRanges.Fold);
+                BringUpFoldRanges(positionRanges.Call);
+                BringUpFoldRanges(positionRanges.Raise);
+            }
 
             if (!node.IsFoldNode || node.ParentNode == null)
             {
@@ -275,263 +261,72 @@ namespace AcrSolver
             if (parentNode.Range == null)
                 parentNode.Range = node.Range;
 
-            if(parentNode.UTGCall == null)
-                parentNode.UTGCall = node.UTGCall;
-            if (parentNode.UTGFold == null)
-                parentNode.UTGFold = node.UTGFold;
-            if (parentNode.UTGRaise == null)
-                parentNode.UTGRaise = node.UTGRaise;
-            if (parentNode.MPCall == null)
-                parentNode.MPCall = node.MPCall;
-            if (parentNode.MPFold == null)
-                parentNode.MPFold = node.MPFold;
-            if (parentNode.MPRaise == null)
-                parentNode.MPRaise = node.MPRaise;
-            if (parentNode.COCall == null)
-                parentNode.COCall = node.COCall;
-            if (parentNode.COFold == null)
-                parentNode.COFold = node.COFold;
-            if (parentNode.CORaise == null)
-                parentNode.CORaise = node.CORaise;
-            if (parentNode.BTNCall == null)
-                parentNode.BTNCall = node.BTNCall;
-            if (parentNode.BTNFold == null)
-                parentNode.BTNFold = node.BTNFold;
-            if (parentNode.BTNRaise == null)
-                parentNode.BTNRaise = node.BTNRaise;
-            if (parentNode.SBCall == null)
-                parentNode.SBCall = node.SBCall;
-            if (parentNode.SBFold == null)
-                parentNode.SBFold = node.SBFold;
-            if (parentNode.SBRaise == null)
-                parentNode.SBRaise = node.SBRaise;
-            if (parentNode.BBCall == null)
-                parentNode.BBCall = node.BBCall;
-            if (parentNode.BBFold == null)
-                parentNode.BBFold = node.BBFold;
-            if (parentNode.BBRaise == null)
-                parentNode.BBRaise = node.BBRaise;
+            foreach (var position in (Position[])Enum.GetValues(typeof(Position)))
+            {
+                var positionRanges = node.Children[position];
+                var parentPositionRanges = parentNode.Children[position];
+                if(positionRanges.Fold == null)
+                {
+                    positionRanges.Fold = parentPositionRanges.Fold;
+                }
+                if (positionRanges.Call == null)
+                {
+                    positionRanges.Call = parentPositionRanges.Call;
+                }
+                if (positionRanges.Raise == null)
+                {
+                    positionRanges.Raise = parentPositionRanges.Raise;
+                }
+            }
         }
 
-
-        private PreflopRangeNode GetNodeFromPositionAction(string position, string action, PreflopRangeNode root, bool forceNewIfNull = false)
+        private PreflopRangeNode GetNodeOption(PreflopRangeNode root,
+            PreflopRangeNode.PositionRanges positionRanges,
+            string action,
+            bool forceNewIfNull)
         {
             PreflopRangeNode node = null;
-            switch (position)
+            switch (action)
             {
-                case "UTG":
-                    switch (action)
-                    {
-                        case "Call":
-                            if (forceNewIfNull && root.UTGCall == null)
-                                root.UTGCall = new PreflopRangeNode();
-                            node = root.UTGCall;
-                            break;
-                        case "FOLD":
-                            if (forceNewIfNull && root.UTGFold == null)
-                                root.UTGFold = new PreflopRangeNode() { IsFoldNode = true };
-                            node = root.UTGFold;
-                            break;
-                        case "Raise":
-                        case "AllIn":
-                            if (forceNewIfNull && root.UTGRaise == null)
-                                root.UTGRaise = new PreflopRangeNode();
-                            node = root.UTGRaise;
-                            break;
-                        default:
-                            {
-                                if (!action.Contains("bb"))
-                                    throw new Exception("Invalid action in range files!");
-                                action = action.Replace("bb", "");
-                                if (forceNewIfNull && root.UTGRaise == null)
-                                    root.UTGRaise = new PreflopRangeNode();
-                                if (root.UTGRaise != null)
-                                {
-                                    root.RaiseVal = float.Parse(action);
-                                }
-                                node = root.UTGRaise;
-                            }
-                            break;
-                    }
+                case "Call":
+                    if (forceNewIfNull && positionRanges.Call == null)
+                        positionRanges.Call = new PreflopRangeNode();
+                    node = positionRanges.Call;
                     break;
-                case "MP":
-                    switch (action)
-                    {
-                        case "Call":
-                            if (forceNewIfNull && root.MPCall == null)
-                                root.MPCall = new PreflopRangeNode();
-                            node = root.MPCall;
-                            break;
-                        case "FOLD":
-                            if (forceNewIfNull && root.MPFold == null)
-                                root.MPFold = new PreflopRangeNode() { IsFoldNode = true };
-                            node = root.MPFold;
-                            break;
-                        case "Raise":
-                        case "AllIn":
-                            if (forceNewIfNull && root.MPRaise == null)
-                                root.MPRaise = new PreflopRangeNode();
-                            node = root.MPRaise;
-                            break;
-                        default:
-                            {
-                                if (!action.Contains("bb"))
-                                    throw new Exception("Invalid action in range files!");
-                                action = action.Replace("bb", "");
-                                if (forceNewIfNull && root.MPRaise == null)
-                                    root.MPRaise = new PreflopRangeNode();
-                                if (root.MPRaise != null)
-                                {
-                                    root.RaiseVal = float.Parse(action);
-                                }
-                                node = root.MPRaise;
-                            }
-                            break;
-                    }
+                case "FOLD":
+                    if (forceNewIfNull && positionRanges.Fold == null)
+                        positionRanges.Fold = new PreflopRangeNode() { IsFoldNode = true };
+                    node = positionRanges.Fold;
                     break;
-                case "CO":
-                    switch (action)
-                    {
-                        case "Call":
-                            if (forceNewIfNull && root.COCall == null)
-                                root.COCall = new PreflopRangeNode();
-                            node = root.COCall;
-                            break;
-                        case "FOLD":
-                            if (forceNewIfNull && root.COFold == null)
-                                root.COFold = new PreflopRangeNode() { IsFoldNode = true };
-                            node = root.COFold;
-                            break;
-                        case "AllIn":
-                        case "Raise":
-                            if (forceNewIfNull && root.CORaise == null)
-                                root.CORaise = new PreflopRangeNode();
-                            node = root.CORaise;
-                            break;
-                        default:
-                            {
-                                if (!action.Contains("bb"))
-                                    throw new Exception("Invalid action in range files!");
-                                action = action.Replace("bb", "");
-                                if (forceNewIfNull && root.CORaise == null)
-                                    root.CORaise = new PreflopRangeNode();
-                                if (root.CORaise != null)
-                                {
-                                    root.RaiseVal = float.Parse(action);
-                                }
-                                node = root.CORaise;
-                            }
-                            break;
-                    }
-                    break;
-                case "BTN":
-                    switch (action)
-                    {
-                        case "Call":
-                            if (forceNewIfNull && root.BTNCall == null)
-                                root.BTNCall = new PreflopRangeNode();
-                            node = root.BTNCall;
-                            break;
-                        case "FOLD":
-                            if (forceNewIfNull && root.BTNFold == null)
-                                root.BTNFold = new PreflopRangeNode() { IsFoldNode = true };
-                            node = root.BTNFold;
-                            break;
-                        case "AllIn":
-                        case "Raise":
-                            if (forceNewIfNull && root.BTNRaise == null)
-                                root.BTNRaise = new PreflopRangeNode();
-                            node = root.BTNRaise;
-                            break;
-                        default:
-                            {
-                                if (!action.Contains("bb"))
-                                    throw new Exception("Invalid action in range files!");
-                                action = action.Replace("bb", "");
-                                if (forceNewIfNull && root.BTNRaise == null)
-                                    root.BTNRaise = new PreflopRangeNode();
-                                if (root.BTNRaise != null)
-                                {
-                                    root.RaiseVal = float.Parse(action);
-                                }
-                                node = root.BTNRaise;
-                            }
-                            break;
-                    }
-                    break;
-                case "SB":
-                    switch (action)
-                    {
-                        case "Call":
-                            if (forceNewIfNull && root.SBCall == null)
-                                root.SBCall = new PreflopRangeNode();
-                            node = root.SBCall;
-                            break;
-                        case "FOLD":
-                            if (forceNewIfNull && root.SBFold == null)
-                                root.SBFold = new PreflopRangeNode() { IsFoldNode = true };
-                            node = root.SBFold;
-                            break;
-                        case "AllIn":
-                        case "Raise":
-                            if (forceNewIfNull && root.SBRaise == null)
-                                root.SBRaise = new PreflopRangeNode();
-                            node = root.SBRaise;
-                            break;
-                        default:
-                            {
-                                if (!action.Contains("bb"))
-                                    throw new Exception("Invalid action in range files!");
-                                action = action.Replace("bb", "");
-                                if (forceNewIfNull && root.SBRaise == null)
-                                    root.SBRaise = new PreflopRangeNode();
-                                if (root.SBRaise != null)
-                                {
-                                    root.RaiseVal = float.Parse(action);
-                                }
-                                node = root.SBRaise;
-                            }
-                            break;
-                    }
-                    break;
-                case "BB":
-                    switch (action)
-                    {
-                        case "Call":
-                            if (forceNewIfNull && root.BBCall == null)
-                                root.BBCall = new PreflopRangeNode();
-                            node = root.BBCall;
-                            break;
-                        case "FOLD":
-                            if (forceNewIfNull && root.BBFold == null)
-                                root.BBFold = new PreflopRangeNode() { IsFoldNode = true };
-                            node = root.BBFold;
-                            break;
-                        case "AllIn":
-                        case "Raise":
-                            if (forceNewIfNull && root.BBRaise == null)
-                                root.BBRaise = new PreflopRangeNode();
-                            node = root.BBRaise;
-                            break;
-                        default:
-                            {
-                                if (!action.Contains("bb"))
-                                    throw new Exception("Invalid action in range files!");
-                                action = action.Replace("bb", "");
-                                if (forceNewIfNull && root.BBRaise == null)
-                                    root.BBRaise = new PreflopRangeNode();
-                                if (root.BBRaise != null)
-                                {
-                                    root.RaiseVal = float.Parse(action);
-                                }
-                                node = root.BBRaise;
-                            }
-                            break;
-                    }
+                case "Raise":
+                case "AllIn":
+                    if (forceNewIfNull && positionRanges.Raise == null)
+                        positionRanges.Raise = new PreflopRangeNode();
+                    node = positionRanges.Raise;
                     break;
                 default:
-                    throw new Exception("Invalid target position in range files!");
+                    {
+                        if (!action.Contains("bb"))
+                            throw new Exception("Invalid action in range files!");
+                        action = action.Replace("bb", "");
+                        if (forceNewIfNull && positionRanges.Raise == null)
+                            positionRanges.Raise = new PreflopRangeNode();
+                        if (positionRanges.Raise != null)
+                        {
+                            root.RaiseVal = float.Parse(action);
+                        }
+                        node = positionRanges.Raise;
+                    }
+                    break;
             }
+
+            return node;
+        }
+        
+        private PreflopRangeNode GetNodeFromPositionAction(Position position, string action, PreflopRangeNode root, bool forceNewIfNull = false)
+        {
+            var positionRanges = root.Children[position];
+            var node = GetNodeOption(root, positionRanges, action, forceNewIfNull);
             return node;
         }
 
@@ -546,7 +341,11 @@ namespace AcrSolver
                 var splitIndex = 0;
                 while (splitIndex < fileSplit.Length - 2)
                 {
-                    var targetPos = fileSplit[splitIndex];
+                    Position targetPos;
+                    if(!Enum.TryParse(fileSplit[splitIndex], out targetPos))
+                    {
+                        throw new Exception("Invalid position parsed from range files!");
+                    }
                     var action = fileSplit[splitIndex + 1];
 
                     var nextNode = GetNodeFromPositionAction(targetPos, action, currentNode, true);

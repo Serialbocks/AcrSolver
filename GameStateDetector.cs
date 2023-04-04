@@ -12,6 +12,15 @@ namespace AcrSolver
 {
     public static class GameStateDetector
     {
+        public delegate void PrintInfoDelegate(string text);
+
+        private static PrintInfoDelegate _printInfo;
+
+        public static void RegisterPrintInfo(PrintInfoDelegate printInfo)
+        {
+            _printInfo = printInfo;
+        }
+
         public static void Update(Screenshot screenshot)
         {
             SetPlayerHand(screenshot);
@@ -39,6 +48,7 @@ namespace AcrSolver
             if (matches.Count == 0)
             {
                 GameState.ActivePlayer = -1;
+                return;
             }
 
             GameState.ActivePlayer = PlayerFromPoint(screenshot, matches[0]);
@@ -173,19 +183,20 @@ namespace AcrSolver
             }
         }
 
-        private static List<OpenCvSharp.Point> RunTemplateMatch(string reference, string template, double threshold = 0.9)
-        {
-            using (Mat refMat = new Mat(reference))
-            using (Mat tplMat = new Mat(template))
-                return RunTemplateMatch(refMat, tplMat, threshold);
-        }
-
         private static List<OpenCvSharp.Point> RunTemplateMatch(Screenshot reference, string template, double threshold = 0.9)
         {
+            try
+            {
+                using (Mat refMat = Mat.FromImageData(reference.Bytes))
+                using (Mat tplMat = new Mat(template))
+                    return RunTemplateMatch(refMat, tplMat, threshold);
+            }
+            catch(Exception ex)
+            {
+                _printInfo(ex.ToString());
+            }
             var matches = new List<OpenCvSharp.Point>();
-            using (Mat refMat = Mat.FromImageData(reference.Bytes))
-            using (Mat tplMat = new Mat(template))
-                return RunTemplateMatch(refMat, tplMat, threshold);
+            return matches;
         }
 
         private static List<OpenCvSharp.Point> RunTemplateMatch(Mat refMat, Mat tplMat, double threshold)

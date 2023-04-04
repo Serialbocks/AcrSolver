@@ -61,7 +61,7 @@ namespace AcrSolver
             this.uxCapture.Name = "uxCapture";
             this.uxCapture.Size = new System.Drawing.Size(75, 23);
             this.uxCapture.TabIndex = 0;
-            this.uxCapture.Text = "Capture";
+            this.uxCapture.Text = "Start/Stop";
             this.uxCapture.UseVisualStyleBackColor = true;
             this.uxCapture.Click += new System.EventHandler(this.uxCapture_Click);
             // 

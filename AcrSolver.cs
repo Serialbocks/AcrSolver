@@ -16,25 +16,36 @@ namespace AcrSolver
     {
         private OCR _ocr;
         private TexasSolver _texasSolver;
-        private CancellationTokenSource _threadCancelToken = new CancellationTokenSource();
+        private CancellationTokenSource _threadCancelToken;
 
         public uxMainWindow()
         {
             InitializeComponent();
+            GameStateDetector.RegisterPrintInfo(WriteStatusLine);
             _ocr = new OCR(WriteStatusLine, OnOcrProcessComplete);
             _texasSolver = new TexasSolver(WriteStatusLine, OnTexasSolveComplete);
             UpdateUX();
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
+        }
 
+        private void StartOCR()
+        {
+            _threadCancelToken = new CancellationTokenSource();
             var thread = new Thread(() => MainLoop(_threadCancelToken.Token));
             thread.Start();
+        }
+
+        private void StopOCR()
+        {
+            _threadCancelToken.Cancel();
+            _threadCancelToken = null;
         }
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
             _ocr.Stop();
             _texasSolver.Stop();
-            _threadCancelToken.Cancel();
+            StopOCR();
         }
 
         private void MainLoop(CancellationToken cancelToken)
@@ -81,7 +92,7 @@ namespace AcrSolver
         private void OnOcrProcessComplete()
         {
             UpdateUX();
-            //_texasSolver.ShowHandRange();
+            _texasSolver.ShowHandRange();
         }
 
         private void UpdateUX()
@@ -260,6 +271,14 @@ namespace AcrSolver
 
         private void uxCapture_Click(object sender, EventArgs e)
         {
+            if(_threadCancelToken == null)
+            {
+                StartOCR();
+            }
+            else
+            {
+                StopOCR();
+            }
             
         }
 
