@@ -31,7 +31,7 @@ namespace AcrSolver
         private object stateLock = new object();
         private PrintInfoDelegate _printInfo;
         private NotifyCompleteDelegate _notifycomplete;
-        private OCRState State { get
+        public OCRState State { get
             {
                 lock(stateLock)
                 {
@@ -84,6 +84,7 @@ namespace AcrSolver
                 return;
             }
             _printInfo("OCR Processing...");
+            State = OCRState.Processing;
             _ocrProcess.StandardInput.WriteLine(file);
         }
 

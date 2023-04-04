@@ -272,20 +272,21 @@ namespace AcrSolver
             }
             set
             {
-                if(_board.Count >= 3 && value.Count > _board.Count)
+                if(value.Count < _board.Count)
                 {
-                    foreach(var card in value)
+                    _board = value;
+                }
+                else
+                {
+                    foreach (var card in value)
                     {
-                        if(_board.FirstOrDefault(x => x == card) == null)
+                        if (_board.FirstOrDefault(x => x == card) == null)
                         {
                             _board.Add(card);
                         }
                     }
                 }
-                else
-                {
-                    _board = value;
-                }
+
                 ClearCurrentBets();
             }
         }

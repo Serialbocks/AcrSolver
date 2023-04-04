@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace AcrSolver
 {
@@ -15,6 +16,8 @@ namespace AcrSolver
     {
         private OCR _ocr;
         private TexasSolver _texasSolver;
+        private CancellationTokenSource _threadCancelToken = new CancellationTokenSource();
+
         public uxMainWindow()
         {
             InitializeComponent();
@@ -22,12 +25,52 @@ namespace AcrSolver
             _texasSolver = new TexasSolver(WriteStatusLine, OnTexasSolveComplete);
             UpdateUX();
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
+
+            var thread = new Thread(() => MainLoop(_threadCancelToken.Token));
+            thread.Start();
         }
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
             _ocr.Stop();
             _texasSolver.Stop();
+            _threadCancelToken.Cancel();
+        }
+
+        private void MainLoop(CancellationToken cancelToken)
+        {
+            while(true)
+            {
+                Thread.Sleep(100);
+                if (cancelToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                if(_ocr.State != OCR.OCRState.Ready)
+                {
+                    continue;
+                }
+                if(_texasSolver.State != TexasSolver.TexasSolverState.Ready)
+                {
+                    continue;
+                }
+
+                var screenshot = ScreenshotUtils.PrintWindow();
+                if (screenshot == null)
+                {
+                    WriteStatusLine("Could not find game window");
+                    return;
+                }
+
+                var filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "screenshot.jpg");
+
+                screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
+
+                _ocr.Process(filename);
+
+                GameStateDetector.Update(screenshot);
+            }
         }
 
         private void OnTexasSolveComplete()
@@ -38,7 +81,7 @@ namespace AcrSolver
         private void OnOcrProcessComplete()
         {
             UpdateUX();
-            _texasSolver.ShowHandRange();
+            //_texasSolver.ShowHandRange();
         }
 
         private void UpdateUX()
@@ -217,26 +260,7 @@ namespace AcrSolver
 
         private void uxCapture_Click(object sender, EventArgs e)
         {
-            var screenshot = ScreenshotUtils.PrintWindow();
-            if(screenshot == null)
-            {
-                WriteStatusLine("Could not find game window");
-                return;
-            }
             
-            var filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "screenshot.jpg");
-            //int index = 1;
-            //while(File.Exists(filename))
-            //{
-            //    filename = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), String.Format("screenshot-{0}.jpg", index));
-            //    index++;
-            //}
-            
-            screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
-
-            _ocr.Process(filename);
-
-            GameStateDetector.Update(screenshot);
         }
 
         private void uxClear_Click(object sender, EventArgs e)
