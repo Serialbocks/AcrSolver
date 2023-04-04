@@ -37,7 +37,8 @@ namespace AcrSolver
 
         private void StopOCR()
         {
-            _threadCancelToken.Cancel();
+            if(_threadCancelToken != null)
+                _threadCancelToken.Cancel();
             _threadCancelToken = null;
         }
 
@@ -92,6 +93,10 @@ namespace AcrSolver
         private void OnOcrProcessComplete()
         {
             UpdateUX();
+            if(!GameState.SolvedThisFlop && GameState.Board.Count == 3 && GameState.Seats[0].HasCards)
+            {
+                _texasSolver.Solve();
+            }
             _texasSolver.ShowHandRange();
         }
 

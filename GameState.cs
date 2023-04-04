@@ -26,6 +26,7 @@ namespace AcrSolver
         public BoundingBox StackBoundingBox { get; set; }
         public Position Position { get; set; }
         public bool BetUpdated { get; set; }
+        public Range Range { get; set; }
 
         private float _bet;
     }
@@ -224,6 +225,7 @@ namespace AcrSolver
             }
         };
         public static List<Bet> Bets { get; set; } = new List<Bet>();
+        public static List<Bet> PreflopBets { get; set; } = new List<Bet>();
         public static Bet CurrentBet { get
             {
                 if (Bets.Count == 0)
@@ -233,6 +235,7 @@ namespace AcrSolver
         }
         public static bool AmountsInBB { get; set; }
         public static float Total { get; set; }
+        public static bool SolvedThisFlop { get; set; }
         public static int Button { get
             {
                 return _button;
@@ -251,6 +254,8 @@ namespace AcrSolver
                     var currentIndex = (i + buttonIndex) % Seats.Count;
                     Seats[currentIndex].Position = (Position)i;
                 }
+
+                SolvedThisFlop = false;
             }
         }
         public static int ActivePlayer { get; set; }
@@ -273,6 +278,10 @@ namespace AcrSolver
             }
             set
             {
+                if(_board.Count == 0 && value.Count == 3)
+                {
+                    PreflopBets = new List<Bet>(Bets);
+                }
                 if(value.Count < _board.Count)
                 {
                     _board = value;
@@ -328,12 +337,44 @@ namespace AcrSolver
             return Seats[0].Position;
         }
 
+        public static int PostflopOrder(Position position)
+        {
+            var order = -1;
+            switch (position)
+            {
+                case Position.SB:
+                    order = 0;
+                    break;
+                case Position.BB:
+                    order = 1;
+                    break;
+                case Position.UTG:
+                    order = 2;
+                    break;
+                case Position.MP:
+                    order = 3;
+                    break;
+                case Position.CO:
+                    order = 4;
+                    break;
+                case Position.BTN:
+                    order = 5;
+                    break;
+                default:
+                    break;
+            }
+            return order;
+        }
+
         public static void UpdateCurrentBets()
         {
             var newBets = new List<Bet>();
             foreach(var seat in Seats)
             {
-                if (seat.Bet <= 0 || !seat.BetUpdated)
+                if (seat.Bet <= 0)
+                    continue;
+
+                if (GameState.Bets.FirstOrDefault(x => x.Amount == seat.Bet && x.Position == seat.Position) != null)
                     continue;
 
                 newBets.Add(new Bet
@@ -342,14 +383,13 @@ namespace AcrSolver
                     Position = seat.Position,
                     Seat = seat
                 });
-                seat.BetUpdated = false;
             }
 
             if (BoardState == BoardState.Preflop)
             {
                 // Ensure seat positions are correct
                 var currentPosition = Position.SB;
-                for (var i = (Button + 1) % Seats.Count; i != Button; i = (i + 1) % Seats.Count)
+                for (var i = Button % Seats.Count; i != (Button - 1); i = (i + 1) % (Seats.Count))
                 {
                     var seat = Seats[i];
                     if (currentPosition == Position.SB && seat.Bet <= 0.5f)
