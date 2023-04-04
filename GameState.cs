@@ -74,6 +74,7 @@ namespace AcrSolver
         public float Amount { get; set; }
         public Position Position { get; set; }
         public BetType Type { get; set; }
+        public Seat Seat { get; set; }
         public int PreflopOrder()
         {
             var order = 0;
@@ -238,7 +239,7 @@ namespace AcrSolver
             }
             set
             {
-                if (value < 0)
+                if (value < 0 || _button == value)
                     return;
                 _button = value;
                 var buttonIndex = Button;
@@ -338,19 +339,42 @@ namespace AcrSolver
                 newBets.Add(new Bet
                 {
                     Amount = seat.Bet,
-                    Position = seat.Position
+                    Position = seat.Position,
+                    Seat = seat
                 });
                 seat.BetUpdated = false;
             }
 
-            if(BoardState == BoardState.Preflop)
+            if (BoardState == BoardState.Preflop)
             {
+                // Ensure seat positions are correct
+                var currentPosition = Position.SB;
+                for (var i = (Button + 1) % Seats.Count; i != Button; i = (i + 1) % Seats.Count)
+                {
+                    var seat = Seats[i];
+                    if (currentPosition == Position.SB && seat.Bet <= 0.5f)
+                    {
+                        seat.Position = currentPosition;
+                        currentPosition = NextPosition(currentPosition);
+                    }
+                    else if (currentPosition == Position.BB && seat.Bet == 1.0f)
+                    {
+                        seat.Position = currentPosition;
+                        currentPosition = NextPosition(currentPosition);
+                    }
+                    else if(currentPosition != Position.BB && currentPosition != Position.SB)
+                    {
+                        seat.Position = currentPosition;
+                        currentPosition = NextPosition(currentPosition);
+                    }
+                }
+
                 newBets = newBets.OrderBy(x => x.PreflopOrder()).OrderBy(x => x.Amount).ToList();
                 if (newBets.Count > 0 && newBets[0].Amount <= 0.5f)
                 {
                     newBets = newBets.Skip(1).ToList();
                 }
-                if(newBets.Count > 0 && newBets[0].Amount == 1.0f)
+                while(newBets.Count > 0 && newBets[0].Amount == 1.0f)
                 {
                     newBets = newBets.Skip(1).ToList();
                 }

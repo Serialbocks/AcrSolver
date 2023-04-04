@@ -116,6 +116,20 @@ namespace AcrSolver
                     }));
                 }
             }
+
+            var sixSpade = GameState.PlayerHand.FirstOrDefault(x => x == "6s");
+            var fiveSpade = GameState.PlayerHand.FirstOrDefault(x => x == "5s");
+            if (GameState.PlayerHand.Count > 2 && sixSpade != null && fiveSpade != null)
+            {
+                GameState.PlayerHand.Remove(sixSpade);
+            }
+
+            var sixHeart = GameState.PlayerHand.FirstOrDefault(x => x == "6h");
+            var fiveHeart = GameState.PlayerHand.FirstOrDefault(x => x == "5h");
+            if (GameState.PlayerHand.Count > 2 && sixHeart != null && fiveHeart != null)
+            {
+                GameState.PlayerHand.Remove(sixHeart);
+            }
         }
 
         private static void SetBoard(Screenshot screenshot)
