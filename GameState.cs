@@ -244,7 +244,9 @@ namespace AcrSolver
             {
                 if (value < 0 || _button == value)
                     return;
+
                 _button = value;
+                ClearCurrentBets();
                 var buttonIndex = Button;
                 if (buttonIndex < 0)
                     buttonIndex = 0;
@@ -278,6 +280,7 @@ namespace AcrSolver
             }
             set
             {
+                var boardChanged = _board.Count != value.Count;
                 if(_board.Count == 0 && value.Count == 3)
                 {
                     PreflopBets = new List<Bet>(Bets);
@@ -297,7 +300,9 @@ namespace AcrSolver
                     }
                 }
 
-                ClearCurrentBets();
+                if(boardChanged)
+                    ClearCurrentBets();
+
             }
         }
         public static BoardState BoardState
@@ -373,6 +378,13 @@ namespace AcrSolver
             {
                 if (seat.Bet <= 0)
                     continue;
+
+                // Remove erroneous bets
+                var higherSeatBets = Bets.Where(x => x.Position == seat.Position && x.Amount > seat.Bet).ToList();
+                foreach (var higherBet in higherSeatBets)
+                {
+                    Bets.Remove(higherBet);
+                }
 
                 if (GameState.Bets.FirstOrDefault(x => x.Amount == seat.Bet && x.Position == seat.Position) != null)
                     continue;

@@ -227,8 +227,8 @@ namespace AcrSolver
                     break;
                 case "Done":
                     ParseOCRData();
-                    State = OCRState.Ready;
                     _notifycomplete();
+                    State = OCRState.Ready;
                     _printInfo("OCR Done!");
                     break;
                 default:

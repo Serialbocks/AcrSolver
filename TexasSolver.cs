@@ -99,7 +99,7 @@ namespace AcrSolver
             float effectiveStack = float.MaxValue;
             foreach(var seat in GameState.Seats)
             {
-                if(seat.HasCards && seat.Stack < effectiveStack)
+                if(seat.HasCards && seat.Stack > 0 && seat.Stack < effectiveStack)
                 {
                     effectiveStack = seat.Stack;
                 }
@@ -134,6 +134,11 @@ namespace AcrSolver
             {
                 ip = playersWithCards[1];
                 oop = playersWithCards[0];
+            }
+            if(GameState.PreflopBets.Count == 0)
+            {
+                _printInfo(String.Format("No preflop bets to solve for!"));
+                return;
             }
             var lastBet = GameState.PreflopBets[GameState.PreflopBets.Count - 1];
             var ipBetLast = true;
@@ -216,6 +221,7 @@ namespace AcrSolver
             _solverProcess.StandardInput.WriteLine(String.Format("set_dump_rounds 2"));
             _solverProcess.StandardInput.WriteLine(String.Format("dump_result output_result.json"));
 
+            _printInfo("Solver processing...");
             GameState.SolvedThisFlop = true;
             State = TexasSolverState.Processing;
         }

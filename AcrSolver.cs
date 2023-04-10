@@ -79,9 +79,9 @@ namespace AcrSolver
 
                 screenshot.Bitmap.Save(filename, ImageFormat.Jpeg);
 
-                _ocr.Process(filename);
-
                 GameStateDetector.Update(screenshot);
+
+                _ocr.Process(filename);
             }
         }
 

@@ -120,8 +120,10 @@ namespace AcrSolver
             {
                 var foldSplit = foldValue.Split(":");
                 var hand = foldSplit[0];
+                var reverseHand = String.Format("{0}{1}{2}", hand[1], hand[0], hand.Substring(2, hand.Length - 2));
                 var frequency = float.Parse(foldSplit[1]);
                 _range[hand].FoldFrequency = frequency;
+                _range[reverseHand].FoldFrequency = frequency;
             }
         }
 
@@ -133,8 +135,10 @@ namespace AcrSolver
             {
                 var callSplit = callValue.Split(":");
                 var hand = callSplit[0];
+                var reverseHand = String.Format("{0}{1}{2}", hand[1], hand[0], hand.Substring(2, hand.Length - 2));
                 var frequency = float.Parse(callSplit[1]);
                 _range[hand].CallFrequency = frequency;
+                _range[reverseHand].CallFrequency = frequency;
             }
         }
 
@@ -146,8 +150,10 @@ namespace AcrSolver
             {
                 var raiseSplit = raiseValue.Split(":");
                 var hand = raiseSplit[0];
+                var reverseHand = String.Format("{0}{1}{2}", hand[1], hand[0], hand.Substring(2, hand.Length - 2));
                 var frequency = float.Parse(raiseSplit[1]);
                 _range[hand].RaiseFrequency = frequency;
+                _range[reverseHand].RaiseFrequency = frequency;
             }
         }
     }

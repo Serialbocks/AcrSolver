@@ -1,11 +1,13 @@
 
 # https://github.com/mindee/doctr
 
-from doctr.io import DocumentFile
-from doctr.models import ocr_predictor
+
 import json
 import sys
 import os
+
+from doctr.io import DocumentFile
+from doctr.models import ocr_predictor
 
 def print_stdout(text):
     print(text)
@@ -24,8 +26,13 @@ for lineAll in sys.stdin:
         continue
     image_doc = DocumentFile.from_images(line)
 
+    print_stdout('processing')
+    try:
+        result = model(image_doc)
+    except:
+        print_stdout('Done')
+        continue
     print_stdout('Writing')
-    result = model(image_doc)
     #result.show(image_doc)
     with open('ocr.json', 'w') as f:
         f.write(json.dumps(result.export()))
