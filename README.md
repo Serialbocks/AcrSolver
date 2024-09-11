@@ -1,0 +1,1 @@
+Use OCR and image recognition on screen captures of a poker client to determine the current game state. Feed that game state into a precomputed tree of optimal poker decisions in real time to assis the player in making the best decisions.
